@@ -1,0 +1,128 @@
+/* Maw's outer mantle overlaps every organ. Container queries use the player's
+   real width, so embedded players and fullscreen follow the same layout. */
+#player.organism{
+  container:maw / inline-size;
+  border:0;border-radius:0;background:transparent;box-shadow:none;
+  overflow:visible;isolation:isolate;
+  --muscle-color:#2b0d0e;
+}
+.organism .window{aspect-ratio:16/10;background:transparent;overflow:visible;z-index:0}
+.organism .window video,.organism .window #cover{
+  inset:12% 7% 10%;width:86%;height:78%;object-fit:cover;
+  border-radius:8% 8% 9% 9%;
+}
+.organism .window #cover{object-fit:cover}
+.organism .shade{inset:12% 7% 10%;width:86%;height:78%;border-radius:8%;background:linear-gradient(#0002,transparent 35%,#05020144)}
+.organism .window:after{
+  inset:0;background:var(--frame) center/100% 100% no-repeat;
+  mask-image:linear-gradient(#000 66%,#000e 82%,transparent 100%);
+  transform-origin:50% 75%;z-index:2;
+}
+.organism .plate,.organism .overlaytitle{display:none}
+.organism .clock{
+  z-index:5;bottom:9%;right:11%;background:transparent;
+  font-size:clamp(9px,1.4cqw,12px);color:#d1b4ae;
+  text-shadow:0 1px 3px black,0 0 7px #070201;opacity:.85;
+}
+.organism #expand{
+  z-index:6;right:7%;top:7%;
+  width:44px;height:44px;border:0;border-radius:45% 58% 40% 60%;
+  color:#d7b6a3;background:radial-gradient(ellipse at 35% 30%,#69503e99,#1b0b0bf0 60%,#070303d9);
+  box-shadow:inset 1px 2px 4px #ad827544,inset -2px -4px 5px #000b,0 2px 4px #0008;
+}
+.organism #expand:hover{color:#ffd6c7;filter:brightness(1.2)}
+.organism .organs{
+  position:relative;isolation:isolate;z-index:3;
+  display:grid;grid-template-areas:"pause seek volume";
+  grid-template-columns:clamp(88px,17cqw,156px) minmax(0,1fr) clamp(136px,28cqw,258px);
+  align-items:center;gap:0;
+  height:clamp(160px,27cqw,244px);
+  margin-top:clamp(-72px,-8cqw,-30px);
+  padding:clamp(22px,4cqw,40px) 5% 18px;
+  border:0;background:transparent;
+}
+.organism .organs:before{
+  z-index:-2;inset:-15px -1% -5px;
+  background:url("./tissue/maw-mantle.webp") center/100% 100% no-repeat;
+  filter:brightness(.77) saturate(.88);
+  transform-origin:50% 80%;
+}
+.organism .organs:after{
+  content:"";position:absolute;z-index:4;pointer-events:none;
+  inset:0 -1% -5px;
+  background:url("./tissue/maw-mantle.webp") center/100% 100% no-repeat;
+  mask-image:linear-gradient(transparent 76%,#000b 86%,#000 100%);
+  filter:brightness(.83) saturate(.88);
+}
+.organism #play.maw-button{
+  grid-area:pause;z-index:2;width:118%;max-width:178px;
+  height:auto;justify-self:center;margin-left:2%;border-radius:0;
+}
+.organism #play .maw-surface{
+  border-radius:0;
+  mask-image:radial-gradient(ellipse 49% 48% at 50% 50%,#000 68%,#000e 80%,transparent 100%);
+  filter:saturate(.86) brightness(.93);
+}
+.organism #timeline{
+  grid-area:seek;z-index:3;width:calc(100% + 42px);margin-inline:-21px;
+  height:100%;min-height:60px;align-self:center;
+}
+.organism #timeline .maw-rail{
+  mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+  filter:brightness(.85) saturate(.88);
+}
+.organism .volume{grid-area:volume;position:relative;z-index:2;min-width:0;width:110%;height:100%;margin-left:-3%}
+.organism #gills{width:100%;height:100%;min-height:70px}
+.organism #gills .maw-bellows{
+  mask-image:radial-gradient(ellipse 50% 48% at 50% 50%,#000 67%,#000e 80%,transparent 100%);
+  filter:brightness(.92) saturate(.88);
+}
+.organism #mute{
+  position:absolute;z-index:6;right:10%;bottom:12%;min-width:34px;width:34px;height:34px;padding:0;
+  border:0;border-radius:42% 55% 45% 58%;
+  background:radial-gradient(ellipse at 40% 25%,#55212499,#1b0808d9 65%,transparent 72%);
+  color:#ec7162;font-size:20px;text-shadow:0 0 7px #e94a32;
+}
+.organism .rail:focus-within{outline:0;border-radius:0}
+.organism .rail input:focus-visible{outline:0}
+.organism .rail:has(input:focus-visible){filter:drop-shadow(0 0 5px #f4836955)}
+.organism #play:focus-visible,.organism #expand:focus-visible,.organism #mute:focus-visible{
+  outline:0;filter:drop-shadow(0 0 5px #ffb4a2) brightness(1.13);
+}
+.live .organism .organs:before{animation:mantle-breath 7.5s ease-in-out infinite}
+@keyframes mantle-breath{50%{transform:scale(1.004,1.018);filter:brightness(.84) saturate(.93)}}
+@container maw (max-width:560px){
+  .organism .window{aspect-ratio:16/10}
+  .organism .organs{
+    grid-template-areas:"seek seek" "pause volume";
+    grid-template-columns:38% 62%;
+    grid-template-rows:62px 108px;
+    height:204px;margin-top:-29px;
+    padding:10px 8% 15px;align-items:center;
+  }
+  .organism .organs:before{inset:-30px -1% -6px}
+  .organism .organs:after{inset:-30px -1% -6px;mask-image:linear-gradient(transparent 83%,#000 100%)}
+  .organism #timeline{
+    width:112%;margin:-10px -6% 0;height:104px;z-index:3;
+  }
+  .organism #play.maw-button{width:130px;max-width:125%;justify-self:center;margin:0}
+  .organism .volume{width:117%;height:125px;margin-left:-9%;align-self:center}
+  .organism #gills{height:125px}
+  .organism #mute{right:10%;bottom:10%;width:32px;height:32px}
+  .organism .clock{bottom:10%;right:12%;font-size:9px}
+  .organism #expand{width:36px;height:36px;font-size:17px}
+}
+@container maw (max-width:350px){
+  .organism .organs{grid-template-rows:54px 94px;height:183px;padding-inline:7%}
+  .organism #play.maw-button{width:112px}
+  .organism .volume,.organism #gills{height:110px}
+  .organism #timeline{height:96px}
+}
+#player.organism:fullscreen{display:flex;flex-direction:column;background:#0b0808;justify-content:center}
+#player.organism:fullscreen .window{flex:1;min-height:0}
+#player.organism:fullscreen .organs{flex:none;width:100%;max-height:230px}
+@media(prefers-reduced-motion:reduce){.live .organism .organs:before{animation:none}}
+.organism #timeline input{height:44px;top:calc(50% - 22px)}
+.organism #gills input{left:12%;width:82%;height:70%;top:15%;right:auto;bottom:auto}
+.organism .window:after{background-image:url("./tissue/maw-frame-clean.webp")}
+.organism .window video,.organism .window #cover,.organism .shade{top:19%;height:80%;bottom:1%}

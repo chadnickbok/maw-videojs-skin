@@ -4,6 +4,23 @@ An experimental biomechanical player with four skins: Maw, Leech, Thorax, and Ch
 
 [Open the hosted player](https://living-specimens.nickchadwick187.chatgpt.site)
 
+## Responsive organism
+
+Maw uses a shared transparent frame and muscle mantle around its moving organs.
+The foreground mantle overlaps sprite boundaries, and the rail samples the
+continuous middle of its painting so standalone end sockets do not break the join.
+The control layout follows the player's own width with a container query. Wide
+players use one row; compact players put the scrubber above pause and volume.
+Keyboard focus illuminates the organ contour instead of a rectangular panel.
+
+![Wide Maw player](docs/maw-wide.jpg)
+
+![Compact Maw player](docs/maw-phone.jpg)
+
+Browser review covered viewport widths 320, 390, 560, 800, 844, 1000, 1200 and
+1440 pixels, including live resizing across the layout transition. Seek and
+volume values survived resizing with no horizontal overflow.
+
 ## Run locally
 
 Serve the static output directory over HTTP:
@@ -33,7 +50,7 @@ Open http://localhost:8000. No package installation or build is required.
 
 ## Current limits
 
-The preview browser disables WebGL, so browser verification covered the Canvas fallback, seeking, rapid direction changes, endpoints, playback, and skin switching. WebGL visuals still need device verification, including iOS portrait/landscape. Generated sprite poses retain some fine-detail variation. Highlight normals are approximate rather than physical normal maps.
+The preview browser disables WebGL, so browser verification covered the Canvas fallback, seeking, rapid direction changes, endpoints, playback, and skin switching. WebGL visuals and fullscreen still need device verification. The responsive layouts were reviewed in resized browser viewports, rather than on physical iOS hardware. Generated sprite poses retain some fine-detail variation. Highlight normals are approximate rather than physical normal maps.
 
 The bundled Oceans clip is the Video.js demonstration video. Video.js is third-party open-source software. Artwork was generated with image generation tools and prepared through several reference-guided passes.
 

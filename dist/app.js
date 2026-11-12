@@ -26,12 +26,13 @@ for (const [i,s] of specimens.entries()) {
 }
 let skin, live=!matchMedia('(prefers-reduced-motion: reduce)').matches, pressure=0, dragging=false, lastX=0, velocity=0;
 function select(s){
- skin=s; mawButton.select(s.id === 'maw'); mawScrubber.select(s.id === 'maw');mawVolume.select(s.id === 'maw'); const body=document.body.style;
+ skin=s; $('#player').classList.toggle('organism',s.id==='maw'); mawButton.select(s.id === 'maw'); mawScrubber.select(s.id === 'maw');mawVolume.select(s.id === 'maw'); const body=document.body.style;
  body.setProperty('--accent',s.accent); body.setProperty('--ink',s.ink);body.setProperty('--cycle',s.cycle+'s');
  for(const part of ['dock','pause','frame']) body.setProperty('--'+part,'url(tissue/'+s.id+'-'+part+'.webp)');
  $('#cover').src='tissue/'+s.id+'-poster.webp'; $('#name').textContent=titleCase(s.id);
  $('#noteTitle').textContent=s.title;$('#desc').textContent=s.note;$('#species').textContent='SPECIMEN '+number(specimens.indexOf(s))+' / 04';
  for(const b of document.querySelectorAll('.item')){const on=b.dataset.id===s.id;b.setAttribute('aria-pressed',on);b.querySelector('.dot').textContent=on?'●':''}
+ $('#mute').textContent=s.id==='maw'?(media.muted?'×':'·'):(media.muted?'×':'◖))');
  history.replaceState(null,'','#'+s.id);
 }
 select(specimens.find(s=>s.id===location.hash.slice(1))||specimens[3]);
@@ -45,7 +46,7 @@ function sync(){
  $('#mode').textContent=media.ended?'ENDED':media.paused?'AT REST':'PLAYING';
  $('#play').setAttribute('aria-label',media.paused?'Play':'Pause');$('#symbol').textContent=media.paused?'▶︎':'Ⅱ';
  volume.value=media.muted?0:Math.round(media.volume*100);volume.setAttribute('aria-valuetext',volume.value+' percent');
- $('#mute').textContent=media.muted?'×':'◖))';$('#mute').setAttribute('aria-label',media.muted?'Unmute':'Mute');
+ $('#mute').textContent=skin.id==='maw'?(media.muted?'×':'·'):(media.muted?'×':'◖))');$('#mute').setAttribute('aria-label',media.muted?'Unmute':'Mute');
 }
 async function toggle(){if(!media.paused){media.pause();return}try{await media.play()}catch{$('#notice').textContent='Playback could not start. Press play to retry.'}}
 $('#play').onclick=toggle;$('.window').onclick=e=>{if(!e.target.closest('button'))toggle()};

@@ -23,10 +23,9 @@ export function createMawScrubber(rail, input, media) {
 
   function position() { const m = metrics(); return m.margin + m.travel * progress; }
   function sourceU(u) {
-    const cap = Math.min(30 / width, .22);
-    if (u < cap) return u / cap * .12;
-    if (u > 1-cap) return .88 + (u-(1-cap)) / cap * .12;
-    return .12 + (u-cap) / (1-2*cap) * .76;
+    // Use the continuous middle of the painting. The end sockets are now
+    // supplied by the shared body, so separate bulbous ends would double up.
+    return .13 + u * .74;
   }
 
   function deform(u, v, lower) {
