@@ -1,14 +1,16 @@
+import { createMawVolume } from './maw-volume.js';
 import { createMawScrubber } from './maw-scrubber.js';
 import { createMawButton } from './maw-button.js';
 const $ = s => document.querySelector(s);
 const media = $('#media'), seek = $('#timeline input'), volume = $('#gills input');
 const mawButton = createMawButton($('#play'), media);
 const mawScrubber = createMawScrubber($('#timeline'), seek, media);
+const mawVolume = createMawVolume($('#gills'), volume, media);
 const specimens = [
  {id:'thorax',accent:'#f3bd70',ink:'#423524',cycle:5.8,title:'Costal bellows',note:'A larva threads the ribs as you scrub. Feed the tendril through the bellows to swell each amber sac.'},
  {id:'leech',accent:'#82e6df',ink:'#233c37',cycle:4.7,title:'Branchial reflex',note:'Pull the tendril to spread the gills. The eel follows your drag through a fluid channel, trailing cold light.'},
  {id:'chrysalis',accent:'#e7cc97',ink:'#493d49',cycle:7.2,title:'Pupal membrane',note:'Roll the luminous egg along the centipede. Its legs ripple in sequence as silk stretches around the volume antenna.'},
- {id:'maw',accent:'#fa978b',ink:'#442829',cycle:3.9,title:'Mandibular groove',note:'Draw the grub between the lips. The groove opens around its shell and contracts behind it. Press the paired cushions to pause.'}
+ {id:'maw',accent:'#fa978b',ink:'#442829',cycle:3.9,title:'Mandibular groove',note:'Draw the grub between the lips. The groove opens around its shell and contracts behind it. Press the paired cushions to pause. Push the bone left to inflate the sacs and increase volume.'}
 ];
 const images = {};
 const titleCase = s => s[0].toUpperCase()+s.slice(1);
@@ -24,7 +26,7 @@ for (const [i,s] of specimens.entries()) {
 }
 let skin, live=!matchMedia('(prefers-reduced-motion: reduce)').matches, pressure=0, dragging=false, lastX=0, velocity=0;
 function select(s){
- skin=s; mawButton.select(s.id === 'maw'); mawScrubber.select(s.id === 'maw'); const body=document.body.style;
+ skin=s; mawButton.select(s.id === 'maw'); mawScrubber.select(s.id === 'maw');mawVolume.select(s.id === 'maw'); const body=document.body.style;
  body.setProperty('--accent',s.accent); body.setProperty('--ink',s.ink);body.setProperty('--cycle',s.cycle+'s');
  for(const part of ['dock','pause','frame']) body.setProperty('--'+part,'url(tissue/'+s.id+'-'+part+'.webp)');
  $('#cover').src='tissue/'+s.id+'-poster.webp'; $('#name').textContent=titleCase(s.id);
@@ -33,7 +35,7 @@ function select(s){
  history.replaceState(null,'','#'+s.id);
 }
 select(specimens.find(s=>s.id===location.hash.slice(1))||specimens[3]);
-function motion(){mawButton.motion(live);mawScrubber.motion(live);document.body.classList.toggle('live',live);$('#motion').setAttribute('aria-pressed',live);$('#motion').textContent='◌  Ambient motion '+(live?'on':'off')}
+function motion(){mawButton.motion(live);mawScrubber.motion(live);mawVolume.motion(live);document.body.classList.toggle('live',live);$('#motion').setAttribute('aria-pressed',live);$('#motion').textContent='◌  Ambient motion '+(live?'on':'off')}
 motion();$('#motion').onclick=()=>{live=!live;motion()};
 function stamp(v){return Math.floor(v/60)+':'+String(Math.floor(v%60)).padStart(2,'0')}
 function sync(){
@@ -59,7 +61,7 @@ for(const control of [seek,volume]){control.onpointerdown=e=>{dragging=true;last
 for(const e of ['pointerup','pointercancel','blur'])window.addEventListener(e,()=>dragging=false);
 sync();
 
-const surfaces=['#timeline canvas:not(.maw-rail)','#gills canvas'].map(sel=>{const canvas=$(sel);return {canvas,ctx:canvas.getContext('2d'),width:0,height:0}});
+const surfaces=['#timeline canvas:not(.maw-rail)','#gills canvas:not(.maw-bellows)'].map(sel=>{const canvas=$(sel);return {canvas,ctx:canvas.getContext('2d'),width:0,height:0}});
 const resize=new ResizeObserver(entries=>{for(const entry of entries){const s=surfaces.find(o=>o.canvas===entry.target);s.width=entry.contentRect.width;s.height=entry.contentRect.height;const ratio=Math.min(devicePixelRatio||1,2);s.canvas.width=Math.round(s.width*ratio);s.canvas.height=Math.round(s.height*ratio);s.ctx.setTransform(ratio,0,0,ratio,0,0)}});
 for(const s of surfaces) resize.observe(s.canvas);
 function tissue(c,img,x,y,rx,ry,angle=0){
@@ -86,6 +88,7 @@ function drawSeek({ctx:c,width:w,height:h},t,b){
  glow(c,x,y(x/w),thumb*1.35,.14+b*.08+pressure*.07)
 }
 function drawVolume({ctx:c,width:w,height:h},t,b){
+ if(skin.id==='maw' && $('#gills').classList.contains('maw-bellows-ready'))return;
  const a=images[skin.id],v=Number(volume.value)/100,n=skin.id==='thorax'?5:8, gap=w/(n+1),mid=h*.53;
  for(let i=0;i<n;i++){const pos=(i+1)/(n+1),opened=Math.max(0,Math.min(1,(v-pos)*n+1)),breath=Math.sin(t*1.2-i*.48);
   const x=(i+1)*gap,y=mid+3*breath;

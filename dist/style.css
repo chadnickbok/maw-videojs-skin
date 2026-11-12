@@ -19,3 +19,13 @@
 .maw-scrubber{height:100%;overflow:visible}
 .maw-scrubber input{z-index:2;touch-action:none}
 @media(max-width:760px){.organs:has(.maw-button){grid-template-columns:68px minmax(0,1fr) 21%}.maw-scrubber{min-width:0}}
+.maw-bellows{display:none;pointer-events:none}
+.maw-volume.maw-bellows-ready .maw-bellows{display:block}
+.maw-volume.maw-bellows-ready canvas:not(.maw-bellows){visibility:hidden}
+.maw-volume{height:100%;min-width:0}
+.maw-volume input{z-index:2;touch-action:none}
+.organs:has(.maw-volume){grid-template-columns:clamp(80px,11vw,134px) minmax(0,1fr) 27%}
+.live .maw-volume[data-renderer="canvas"] .maw-bellows{animation:bellows-breath 5s ease-in-out infinite}
+@keyframes bellows-breath{50%{filter:brightness(1.055);transform:scale(1.005,1.015)}}
+@media(max-width:760px){.organs:has(.maw-volume){grid-template-columns:68px minmax(0,1fr) 30%}.organs:has(.maw-volume) #mute{min-width:22px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.live .maw-volume[data-renderer="canvas"] .maw-bellows{animation:none}}
