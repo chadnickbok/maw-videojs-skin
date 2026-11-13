@@ -46,3 +46,37 @@ interaction transitions available.
 Visual checks used the Canvas renderer because this browser disables WebGL.
 The optional WebGL enhancement and physical iOS device performance remain
 unverified. The GIF is an authored sprite study, not a live player recording.
+
+## Firm anatomy revision
+
+The 30-pose whole-creature atlas is superseded by independently rendered parts:
+
+- `dist/tissue/thorax-volume-shell-v2.webp`: a new fixed perforated ivory head,
+  chamber rims and articulated legs; its open windows have true transparency.
+- `dist/tissue/thorax-volume-sacs-v2.webp`: fifteen isolated membrane poses,
+  five columns by three rows. The image-generation brief retained the original
+  translucent chambers, fine veins, fixed organ positions and controlled amber
+  glow, with collapsed folds progressively becoming taut.
+- `dist/tissue/thorax-volume-tendon-v2.webp`: tissue sampled from the approved
+  earlier appendage painting, mapped uniquely along a continuous curved ribbon.
+
+The rigid-layer brief preserved the approved creature's head, medallion, thin
+legs and chamber roots while removing all soft tissue for independent compositing.
+The generated shell is shaded to match Thorax. It stays fixed as the membranes
+change. The sacs respond with a 28/s exponential approach; a separately damped
+appendage follows their pressure and recoils after reversals. Its root remains
+fixed. A single ribbon silhouette clips texture sampling, preventing strip seams.
+The WebGL pass no longer displaces the whole volume organ and applies less
+bloom there. Recess shadows create dark separation beneath the legs.
+
+The iris's visible painting is 18% smaller, with its HTML touch target unchanged.
+A soft recess and restrained spill embed the rim in the tendon bed.
+
+Eleven tests pass, including a new check that sacs lead the curl and both settle
+after reversal, with immediate stable reduced-motion endpoints. Browser review
+covered 320, 390 and 1000px viewports, no horizontal overflow, volume and media
+state across resizing, volume during playback (55% actual Web Audio gain), mute
+restoration, and the smaller play control. Canvas was verified; physical iOS and
+WebGL appearance remain unverified.
+
+![Refined composition](firm-phone.jpg)
