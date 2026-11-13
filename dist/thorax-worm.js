@@ -1,3 +1,4 @@
+import {isolateSpriteAlpha} from './sprite-matte.js';
 import {clamp,wormMetrics,wormTextureU,createWormMotion} from './worm-motion.js';
 
 // All soft anatomy uses the same contact coordinates. The foreground cage never
@@ -6,7 +7,21 @@ export function createThoraxWorm(images,player) {
   const motion=createWormMotion(40);
   const headBlend=document.createElement('canvas'),headInk=headBlend.getContext('2d');
   let prepared=false,phase=0;
-  function prepare(){prepared=true;}
+  const headFrames=[];
+  function prepare(){
+    const image=images.wormHead,cw=image.width/3,ch=image.height/3;
+    for(let i=0;i<9;i++){
+      const frame=document.createElement('canvas');frame.width=cw;frame.height=ch;
+      const ink=frame.getContext('2d',{willReadFrequently:true});
+      // Copy into an isolated surface before filtering or scaling; the sampler
+      // must never borrow opaque neck pixels from the neighboring atlas cell.
+      ink.drawImage(image,i%3*cw,Math.floor(i/3)*ch,cw,ch,0,0,cw,ch);
+      const pixels=ink.getImageData(0,0,cw,ch);
+      isolateSpriteAlpha(pixels.data,cw,ch);ink.putImageData(pixels,0,0);
+      headFrames.push(frame);
+    }
+    prepared=true;
+  }
   function path(ctx,nodes,side=1){
     ctx.moveTo(nodes[0].x,nodes[0].y+side*nodes[0].radius);
     for(let i=1;i<nodes.length;i++)ctx.lineTo(nodes[i].x,nodes[i].y+side*nodes[i].radius);
@@ -20,8 +35,8 @@ export function createThoraxWorm(images,player) {
     const frame=reduced?0:phase%8,a=Math.floor(frame),b=Math.min(a+1,8),mix=frame-a;
     if(headBlend.width!==cw||headBlend.height!==ch){headBlend.width=cw;headBlend.height=ch;}
     headInk.clearRect(0,0,cw,ch);headInk.globalCompositeOperation='lighter';
-    headInk.globalAlpha=1-mix;headInk.drawImage(image,a%3*cw,Math.floor(a/3)*ch,cw,ch,0,0,cw,ch);
-    headInk.globalAlpha=mix;headInk.drawImage(image,b%3*cw,Math.floor(b/3)*ch,cw,ch,0,0,cw,ch);
+    headInk.globalAlpha=1-mix;headInk.drawImage(headFrames[a],0,0);
+    headInk.globalAlpha=mix;headInk.drawImage(headFrames[b],0,0);
     headInk.globalCompositeOperation='destination-in';headInk.globalAlpha=1;
     const fade=headInk.createLinearGradient(0,0,cw*.24,0);fade.addColorStop(0,'#0000');fade.addColorStop(1,'#000');headInk.fillStyle=fade;headInk.fillRect(0,0,cw,ch);
     const drawWidth=headWidth*1.15,h=drawWidth*ch/cw;

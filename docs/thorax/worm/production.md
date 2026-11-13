@@ -84,3 +84,11 @@ the four upper mouth feelers forward along the tube. Their shallow arc stays
 close to the top of the fleshy head instead of rising out of the ribcage.
 The image-generation edit preserved scale, fixed neck attachment, amber organs,
 transparency and cell layout; only the feelers' direction and length changed.
+
+## Detached atlas sliver fix
+
+Some generated cells contained a narrow detached part of the next pose's neck
+at their right edge. The warm pixels appeared as a lighting line ahead of the
+head. Head preparation now isolates each frame, retains the largest connected
+alpha component with its soft fringe, and blends these separate surfaces. This
+removes detached residue and prevents sampling neighboring atlas cells.
