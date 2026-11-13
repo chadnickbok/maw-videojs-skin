@@ -225,7 +225,7 @@ export function createThorax(player, media, seek, volume) {
   Promise.all(['body','compact','valve','bellows','channel','wormSkin','wormHead','wormCage'].map(name=>new Promise((resolve,reject)=>{
     const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;
     const paths={wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
-    im.src=paths[name]?'./tissue/thorax-'+paths[name]+'-v1.webp':name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
+    im.src=paths[name]?'./tissue/thorax-'+paths[name]+(name==='wormHead'?'-v2.webp':'-v1.webp'):name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
     prepareValveMatte();worm.prepare();
     try{initialize();}catch(error){player.dataset.thoraxRenderError=error.message;useFallback();}

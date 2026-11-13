@@ -61,3 +61,18 @@ Physical iOS performance remains unverified.
 ![Extraction states](extraction-states.jpg)
 
 ![Compact player](phone.jpg)
+
+## Original creature head restoration
+
+The v2 head atlas replaces the blunt head with anatomy guided by the original
+Thorax reference: wet translucent lobes, an amber gut, a dark sensory pit,
+small mouth appendages, and four long probing feelers. Nine generated poses
+are cropped and registered at their neck attachment in 400 × 360 cells. The
+renderer anchors the neck at 75% cell height to leave room for the feelers.
+The entire sprite continues to draw behind the fixed ribs.
+
+Generation brief: a transparent 3 × 3 atlas of the same right-facing creature,
+with a fixed neck, consistent translucent beige anatomy and amber organ
+positions, subtle head contractions and probing feelers, a near-matching first
+and last pose, and no bones, background, labels or scenery. The original head
+was the anatomy reference; the previous atlas supplied attachment/layout only.

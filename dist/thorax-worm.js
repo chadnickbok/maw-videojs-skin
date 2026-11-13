@@ -24,10 +24,10 @@ export function createThoraxWorm(images,player) {
     headInk.globalAlpha=mix;headInk.drawImage(image,b%3*cw,Math.floor(b/3)*ch,cw,ch,0,0,cw,ch);
     headInk.globalCompositeOperation='destination-in';headInk.globalAlpha=1;
     const fade=headInk.createLinearGradient(0,0,cw*.24,0);fade.addColorStop(0,'#0000');fade.addColorStop(1,'#000');headInk.fillStyle=fade;headInk.fillRect(0,0,cw,ch);
-    const h=headWidth*ch/cw;
+    const drawWidth=headWidth*1.15,h=drawWidth*ch/cw;
     c.save();c.translate(gx,gy);c.rotate(clamp(motion.velocity*.045,-.07,.07));
     c.shadowColor='#080502';c.shadowBlur=4;c.shadowOffsetY=3;
-    c.drawImage(headBlend,-headWidth*.56,-h*.50,headWidth,h);c.restore();
+    c.drawImage(headBlend,-headWidth*.56,-h*.75,drawWidth,h);c.restore();
   }
   function draw(c,r,{progress,dt,time,dragging,ambient,reduced,focused=false}){
     if(!prepared)return;
