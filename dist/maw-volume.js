@@ -9,7 +9,7 @@ export function createMawVolume(rail, input, media) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let enabled = false, ready = false, ambient = true;
   let gl, program, context;
-  let request = 0, previous = 0, inflation = media.muted ? 0 : media.volume;
+  let request = 0, previous = 0, inflation = media.muted ? 0 : Number(input.value)/100;
   let pointer = null, startX = 0, startVolume = 0;
   let width = 1, height = 1;
 
@@ -165,7 +165,7 @@ export function createMawVolume(rail, input, media) {
       rail.classList.toggle('maw-volume',active);
       input.setAttribute('dir',active?'rtl':'ltr');
       input.title=active?'Push left to inflate · louder':'Volume';
-      if(active){inflation=media.muted?0:media.volume;schedule();}
+      if(active){inflation=media.muted?0:Number(input.value)/100;schedule();}
     },
     motion(active){ambient=active;schedule();}
   };

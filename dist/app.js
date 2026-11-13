@@ -1,8 +1,10 @@
+import { createMediaAudio } from './media-audio.js';
 import { createMawVolume } from './maw-volume.js';
 import { createMawScrubber } from './maw-scrubber.js';
 import { createMawButton } from './maw-button.js';
 const $ = s => document.querySelector(s);
 const media = $('#media'), seek = $('#timeline input'), volume = $('#gills input');
+const audio = createMediaAudio(media, { onError: () => { $('#notice').textContent = 'Tap play or the volume control to resume audio.'; } });
 const mawButton = createMawButton($('#play'), media);
 const mawScrubber = createMawScrubber($('#timeline'), seek, media);
 const mawVolume = createMawVolume($('#gills'), volume, media);
@@ -32,7 +34,7 @@ function select(s){
  $('#cover').src='tissue/'+s.id+'-poster.webp'; $('#name').textContent=titleCase(s.id);
  $('#noteTitle').textContent=s.title;$('#desc').textContent=s.note;$('#species').textContent='SPECIMEN '+number(specimens.indexOf(s))+' / 04';
  for(const b of document.querySelectorAll('.item')){const on=b.dataset.id===s.id;b.setAttribute('aria-pressed',on);b.querySelector('.dot').textContent=on?'●':''}
- $('#mute').textContent=s.id==='maw'?(media.muted?'×':'·'):(media.muted?'×':'◖))');
+ $('#mute').textContent=s.id==='maw'?(audio.muted?'×':'·'):(audio.muted?'×':'◖))');
  history.replaceState(null,'','#'+s.id);
 }
 select(specimens.find(s=>s.id===location.hash.slice(1))||specimens[3]);
@@ -45,17 +47,19 @@ function sync(){
  $('#clock').textContent=stamp(media.currentTime)+' / '+(duration?stamp(duration):'–:––');
  $('#mode').textContent=media.ended?'ENDED':media.paused?'AT REST':'PLAYING';
  $('#play').setAttribute('aria-label',media.paused?'Play':'Pause');$('#symbol').textContent=media.paused?'▶︎':'Ⅱ';
- volume.value=media.muted?0:Math.round(media.volume*100);volume.setAttribute('aria-valuetext',volume.value+' percent');
- $('#mute').textContent=skin.id==='maw'?(media.muted?'×':'·'):(media.muted?'×':'◖))');$('#mute').setAttribute('aria-label',media.muted?'Unmute':'Mute');
+ volume.value=Math.round(audio.value*100);volume.setAttribute('aria-valuetext',volume.value+' percent');
+ $('#mute').textContent=skin.id==='maw'?(audio.muted?'×':'·'):(audio.muted?'×':'◖))');$('#mute').setAttribute('aria-label',audio.muted?'Unmute':'Mute');
 }
-async function toggle(){if(!media.paused){media.pause();return}try{await media.play()}catch{$('#notice').textContent='Playback could not start. Press play to retry.'}}
+async function toggle(){if(!media.paused){media.pause();return}try{audio.unlock();await media.play()}catch{$('#notice').textContent='Playback could not start. Press play to retry.'}}
 $('#play').onclick=toggle;$('.window').onclick=e=>{if(!e.target.closest('button'))toggle()};
-for(const e of ['timeupdate','loadedmetadata','play','pause','volumechange','ended','seeked'])media.addEventListener(e,sync);
+for(const e of ['timeupdate','loadedmetadata','play','pause','volumechange','audiolevelchange','ended','seeked'])media.addEventListener(e,sync);
 media.addEventListener('playing',()=>{$('#player').classList.add('started');$('#notice').textContent=''});
 media.addEventListener('error',()=>{if(!media.src.includes('zencdn')){media.src='https://vjs.zencdn.net/v/oceans.mp4'}else{$('#notice').textContent='The demo video could not load.'}});
 seek.oninput=()=>{if(Number.isFinite(media.duration)) media.currentTime=media.duration*seek.value/1000};
-volume.oninput=()=>{media.muted=Number(volume.value)===0;media.volume=volume.value/100;sync()};
-$('#mute').onclick=()=>{if(!media.volume){media.volume=1;media.muted=false}else media.muted=!media.muted;sync()};
+volume.oninput=()=>{audio.set(Number(volume.value)/100);sync()};
+volume.addEventListener('pointerdown',audio.unlock);
+volume.addEventListener('keydown',audio.unlock);
+$('#mute').onclick=()=>{audio.toggleMute();sync()};
 $('#expand').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if($('#player').requestFullscreen)await $('#player').requestFullscreen();else media.webkitEnterFullscreen()}catch{$('#notice').textContent='Fullscreen is unavailable in this browser.'}};
 document.addEventListener('fullscreenchange',()=>$('#expand').setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen'));
 for(const control of [seek,volume]){control.onpointerdown=e=>{dragging=true;lastX=e.clientX};control.onpointermove=e=>{if(dragging){velocity=Math.max(-1,Math.min(1,(e.clientX-lastX)/12));lastX=e.clientX}}}
