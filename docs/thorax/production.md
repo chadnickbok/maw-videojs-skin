@@ -93,3 +93,20 @@ existing WebGL enhancement still needs device verification.
 The old larva scrubber has been superseded by a continuous extracted worm and
 a stationary skeletal cage. See [worm production notes](worm/production.md)
 for the generated assets, material mapping, spring mechanics and browser QA.
+
+## Frame edge cleanup
+
+`dist/frame-edge.js` removes near-transparent matte residue and feathers alpha
+coverage with a five-tap separable kernel. Edge color is reconstructed from
+alpha-weighted neighboring tissue so hidden saturated RGB cannot leak into
+the video-facing silhouette. Fully opaque interior detail remains unchanged.
+The wide body, compact body and rib cage are prepared once when loaded.
+Rendering uses high-quality sampling and up to 2.5 device pixels per CSS pixel,
+bounded by a three-million-pixel surface budget.
+
+Browser review covered bright video beneath both extended and compact frames.
+The browser used Canvas; physical iOS/WebGL appearance remains unverified.
+A regression test checks smooth coverage, preserved opaque tissue and removal
+of saturated near-transparent residue.
+
+![Softened compact frame](soft-edges.jpg)

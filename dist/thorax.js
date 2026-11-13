@@ -1,3 +1,4 @@
+import {softenFrameAlpha} from './frame-edge.js';
 import {isolateSpriteAlpha} from './sprite-matte.js';
 import { createThoraxWorm } from './thorax-worm.js';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -25,7 +26,7 @@ export function createThorax(player, media, seek, volume) {
 
   function measure() {
     const p = player.getBoundingClientRect(); width = p.width; height = p.height;
-    dpr = Math.min(devicePixelRatio || 1, 1.65);
+    dpr = Math.min(devicePixelRatio || 1, 2.5, Math.sqrt(3000000/(width*height)));
     for (const [key, node] of Object.entries({valve: button, rail, bellows, organs: player.querySelector('.organs')})) {
       const r = node.getBoundingClientRect(); rects[key] = {x:r.left-p.left,y:r.top-p.top,w:r.width,h:r.height};
     }
@@ -152,7 +153,7 @@ export function createThorax(player, media, seek, volume) {
     pressure=ease(pressure,dragging||contact?1:0,dt,14);
     respiration+=dt*.9*life;
     ripple=Math.max(0,ripple-dt*1.4);
-    ink.setTransform(dpr,0,0,dpr,0,0);ink.clearRect(0,0,width,height);
+    ink.imageSmoothingEnabled=true;ink.imageSmoothingQuality='high';ink.setTransform(dpr,0,0,dpr,0,0);ink.clearRect(0,0,width,height);
     nineSlice();
     const v=rects.valve,l=rects.bellows,r=rects.rail,folded=width<=560;
     const breath=Math.sin(respiration)*life;
@@ -232,6 +233,14 @@ export function createThorax(player, media, seek, volume) {
     const paths={wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
     im.src=name==='bellows'?'./tissue/thorax-volume-creature-v1.webp':paths[name]?'./tissue/thorax-'+paths[name]+(name==='wormHead'?'-v3.webp':'-v1.webp'):name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
+    for(const name of ['body','compact','wormCage']){
+      const image=images[name],surface=document.createElement('canvas');
+      surface.width=image.width;surface.height=image.height;
+      const c=surface.getContext('2d',{willReadFrequently:true});c.drawImage(image,0,0);
+      const pixels=c.getImageData(0,0,surface.width,surface.height);
+      softenFrameAlpha(pixels.data,surface.width,surface.height);c.putImageData(pixels,0,0);images[name]=surface;
+    }
+    player.dataset.thoraxEdges='feathered';
     prepareValveMatte();worm.prepare();
     const atlas=images.bellows,cw=atlas.width/6,ch=atlas.height/5;
     for(let i=0;i<30;i++){
