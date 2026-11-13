@@ -1,3 +1,4 @@
+import {isolateSpriteAlpha} from './sprite-matte.js';
 import { createThoraxWorm } from './thorax-worm.js';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = (v, target, dt, rate) => v + (target - v) * (1 - Math.exp(-dt * rate));
@@ -17,7 +18,8 @@ export function createThorax(player, media, seek, volume) {
   let gl, program, texture, fallback, width = 1, height = 1, dpr = 1;
   let valve = media.paused ? 1 : 0, inflation = Number(volume.value) / 100;
   let pressure = 0, contact = '', dragging = false, seekPointer = null, volumePointer = null;
-  let startX = 0, startVolume = 0, respiration = 0;
+  let respiration = 0;
+  const volumeFrames=[];
   let ripple = 0, rippleOrigin = 0, focused = '';
   const rects = {};
 
@@ -101,18 +103,18 @@ export function createThorax(player, media, seek, volume) {
     const im=images[name],cw=im.width/cols,ch=im.height/rows;
     const f=clamp(frame,0,cols*rows-1),first=Math.floor(f),next=Math.min(first+1,cols*rows-1),mix=f-first;
     if(mix<.001){
-      ink.save();ink.globalAlpha=alpha;ink.drawImage(im,first%cols*cw,Math.floor(first/cols)*ch,cw,ch,x,y,w,h);ink.restore();return;
+      ink.save();ink.globalAlpha=alpha;name==='bellows'?ink.drawImage(volumeFrames[first],x,y,w,h):ink.drawImage(im,first%cols*cw,Math.floor(first/cols)*ch,cw,ch,x,y,w,h);ink.restore();return;
     }
     // Add premultiplied weights on a transparent surface, then composite once.
     // Drawing two half-opacity sprites directly would dim their shared pixels.
     if(blend.width!==Math.round(cw)||blend.height!==Math.round(ch)){blend.width=Math.round(cw);blend.height=Math.round(ch);}
     mixInk.clearRect(0,0,blend.width,blend.height);mixInk.globalCompositeOperation='lighter';
-    mixInk.globalAlpha=1-mix;mixInk.drawImage(im,first%cols*cw,Math.floor(first/cols)*ch,cw,ch,0,0,cw,ch);
-    mixInk.globalAlpha=mix;mixInk.drawImage(im,next%cols*cw,Math.floor(next/cols)*ch,cw,ch,0,0,cw,ch);
+    mixInk.globalAlpha=1-mix;name==='bellows'?mixInk.drawImage(volumeFrames[first],0,0):mixInk.drawImage(im,first%cols*cw,Math.floor(first/cols)*ch,cw,ch,0,0,cw,ch);
+    mixInk.globalAlpha=mix;name==='bellows'?mixInk.drawImage(volumeFrames[next],0,0):mixInk.drawImage(im,next%cols*cw,Math.floor(next/cols)*ch,cw,ch,0,0,cw,ch);
     ink.save();ink.globalAlpha=alpha;ink.drawImage(blend,x,y,w,h);ink.restore();
   }
   function organ(name,pose,rect) {
-    const cols=name==='valve'?6:5,rows=name==='valve'?5:3,count=cols*rows;
+    const cols=6,rows=5,count=30;
     const aspect=(images[name].width/cols)/(images[name].height/rows);
     let w=rect.w,h=w/aspect;if(h>rect.h*1.15){h=rect.h*1.15;w=h*aspect;}
     const breath=ambient&&!reduced.matches?Math.sin(respiration+(name==='valve'?0:.55))*.012:0;
@@ -146,7 +148,7 @@ export function createThorax(player, media, seek, volume) {
     const valveTarget=media.paused||media.ended?1:0;
     const valveStep=Math.min(elapsed,.25)/1.0; // 30 authored poses over one second, reversible in place
     valve=reduced.matches?valveTarget:valve+Math.sign(valveTarget-valve)*Math.min(Math.abs(valveTarget-valve),valveStep);
-    inflation=reduced.matches?Number(volume.value)/100:ease(inflation,Number(volume.value)/100,dt,14);
+    inflation=reduced.matches?Number(volume.value)/100:ease(inflation,Number(volume.value)/100,dt,9);
     pressure=ease(pressure,dragging||contact?1:0,dt,14);
     respiration+=dt*.9*life;
     ripple=Math.max(0,ripple-dt*1.4);
@@ -159,7 +161,7 @@ export function createThorax(player, media, seek, volume) {
     worm.draw(ink,r,{progress:Number(seek.value)/1000,dt:Math.min(elapsed,.1),time:now/1000,dragging:seekPointer!==null,ambient:liveMotion(),reduced:reduced.matches,focused:focused==='rail'});organ('bellows',inflation,l);organ('valve',valve,v);
     if(ripple>0)glow(rippleOrigin,rects.organs.y+rects.organs.h*.5,35+(1-ripple)*100,35,ripple*.07);
     present(now,life);player.classList.add('thorax-ready');prior=now;
-    player.dataset.thoraxPose=String(Math.round(valve*29));player.dataset.thoraxValve='iris-30';player.dataset.thoraxVolume=String(Math.round(inflation*100));
+    player.dataset.thoraxPose=String(Math.round(valve*29));player.dataset.thoraxValve='iris-30';player.dataset.thoraxVolume=String(Math.round(inflation*100));player.dataset.thoraxVolumePose=String(Math.round(inflation*29));
     if(life||worm.active||Math.abs(valve-(media.paused?1:0))>.001||Math.abs(inflation-Number(volume.value)/100)>.001||pressure>.001||ripple>0)schedule();
   }
   function schedule(){if(!raf&&enabled&&ready&&!document.hidden)raf=requestAnimationFrame(render);}
@@ -179,17 +181,20 @@ export function createThorax(player, media, seek, volume) {
     if(!enabled||e.button!==0)return;e.preventDefault();seek.focus();seekPointer=e.pointerId;dragging=true;touched('rail');seek.setPointerCapture(e.pointerId);scrub(e);
   });
   seek.addEventListener('pointermove',e=>{if(enabled&&e.pointerId===seekPointer){e.preventDefault();scrub(e);}});
+  function inflate(event){
+    const r=volume.getBoundingClientRect();
+    volume.value=String(Math.round(clamp((event.clientX-r.left)/r.width)*100));
+    volume.dispatchEvent(new Event('input',{bubbles:true}));schedule();
+  }
   volume.addEventListener('pointerdown',e=>{
-    if(!enabled||e.button!==0)return;e.preventDefault();volume.focus();volumePointer=e.pointerId;dragging=true;startX=e.clientX;startVolume=Number(volume.value)/100;touched('bellows');volume.setPointerCapture(e.pointerId);
+    if(!enabled||e.button!==0)return;e.preventDefault();volume.focus();volumePointer=e.pointerId;dragging=true;touched('bellows');volume.setPointerCapture(e.pointerId);inflate(e);
   });
   volume.addEventListener('pointermove',e=>{
-    if(!enabled||e.pointerId!==volumePointer)return;e.preventDefault();
-    volume.value=String(Math.round(clamp(startVolume+(startX-e.clientX)/Math.max(65,rects.bellows.w*.65))*100));
-    volume.dispatchEvent(new Event('input',{bubbles:true}));schedule();
+    if(!enabled||e.pointerId!==volumePointer)return;e.preventDefault();inflate(e);
   });
   volume.addEventListener('keydown',e=>{
     if(!enabled)return;let v=Number(volume.value);
-    if(e.key==='ArrowLeft'||e.key==='ArrowUp')v+=5;else if(e.key==='ArrowRight'||e.key==='ArrowDown')v-=5;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp')v+=5;else if(e.key==='ArrowLeft'||e.key==='ArrowDown')v-=5;
     else if(e.key==='Home')v=0;else if(e.key==='End')v=100;else return;
     e.preventDefault();e.stopPropagation();volume.value=String(clamp(v,0,100));volume.dispatchEvent(new Event('input',{bubbles:true}));schedule();
   });
@@ -225,16 +230,23 @@ export function createThorax(player, media, seek, volume) {
   Promise.all(['body','compact','valve','bellows','channel','wormSkin','wormHead','wormCage'].map(name=>new Promise((resolve,reject)=>{
     const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;
     const paths={wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
-    im.src=paths[name]?'./tissue/thorax-'+paths[name]+(name==='wormHead'?'-v3.webp':'-v1.webp'):name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
+    im.src=name==='bellows'?'./tissue/thorax-volume-creature-v1.webp':paths[name]?'./tissue/thorax-'+paths[name]+(name==='wormHead'?'-v3.webp':'-v1.webp'):name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
     prepareValveMatte();worm.prepare();
+    const atlas=images.bellows,cw=atlas.width/6,ch=atlas.height/5;
+    for(let i=0;i<30;i++){
+      const frame=document.createElement('canvas');frame.width=cw;frame.height=ch;
+      const c=frame.getContext('2d',{willReadFrequently:true});
+      c.drawImage(atlas,i%6*cw,Math.floor(i/6)*ch,cw,ch,0,0,cw,ch);
+      const pixels=c.getImageData(0,0,cw,ch);isolateSpriteAlpha(pixels.data,cw,ch);c.putImageData(pixels,0,0);volumeFrames.push(frame);
+    }
     try{initialize();}catch(error){player.dataset.thoraxRenderError=error.message;useFallback();}
     canvas.addEventListener('webglcontextlost',lost);ready=true;measure();schedule();
   }).catch(()=>{player.dataset.thoraxRenderError='Artwork could not load';});
   }
   return {
     select(active){enabled=active;player.classList.toggle('thoracic',active);canvas.hidden=!active;release();
-      if(active){load();volume.dir='rtl';volume.title='Push the bone left to inflate · louder';valve=media.paused?1:0;inflation=Number(volume.value)/100;worm.reset(Number(seek.value)/1000);prior=0;measure();schedule();}
+      if(active){load();volume.dir='ltr';volume.title='Drag across the sacs · right is louder';valve=media.paused?1:0;inflation=Number(volume.value)/100;worm.reset(Number(seek.value)/1000);prior=0;measure();schedule();}
     },
     motion(active){ambient=active;schedule();}
   };

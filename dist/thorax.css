@@ -44,3 +44,9 @@
 .thoracic:not(.thorax-ready) #play{background:url('./tissue/thorax-iris-v3.webp') 100% 100% / 600% 500% no-repeat}
 .thoracic #symbol{visibility:hidden}
 @container thorax (max-width:560px){.thoracic:not(.thorax-ready):before{background-image:url('./tissue/thorax-compact-v2.webp')}}
+
+/* The creature's head mutes; its upper abdomen is one continuous LTR slider. */
+.thoracic #gills input{left:31%;width:61%;height:43%;top:16%;touch-action:none;cursor:ew-resize}
+.thoracic #mute{left:11%;right:auto;top:10%;bottom:auto;width:21%;height:32%;min-width:28px;border-radius:50%;background:none;box-shadow:none;color:transparent;text-shadow:none;font-size:0}
+.thoracic #mute[aria-label="Unmute"]{color:#f5d398;font-size:25px;text-shadow:0 0 5px #000}
+.thoracic #mute:focus-visible{outline:1px solid #eec08066;filter:drop-shadow(0 0 4px #eec080)}

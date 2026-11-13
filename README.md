@@ -65,8 +65,10 @@ absorbs changes in width and height without stretching the foreground organs.
 - The living iris has 30 authored poses. Its membrane petals close while playing
   and open to reveal the amber Play membrane when paused. A one-second
   transition reverses from the current pose, including rapid toggles.
-- The volume bellows have 15 inflation poses. Pushing the bone left increases
-  actual Web Audio gain. Muting preserves the previous level.
+- The volume creature has 30 inflation and contraction poses. Click or drag
+  across its sacs: right increases actual Web Audio gain, left decreases it.
+  The appendage curls beneath the rear chamber as the sacs inflate. The head
+  toggles mute and restores the previous level.
 - The scrubber extracts a continuous worm through stationary ribs. Its skin is
   mapped back from the head, so markings feed out of the socket instead of
   stretching across the visible length. Pulling thins the neck; pushing gathers
@@ -110,5 +112,8 @@ rendering decisions, and verification are documented in
 [worm production notes](docs/thorax/worm/production.md).
 
 ![Extraction at 0, 25 and 80 percent](docs/thorax/worm/extraction-states.jpg)
+
+The Thorax volume animation and browser review are documented in
+[volume production notes](docs/thorax/volume/production.md).
 
 The public repository streams the demo from https://vjs.zencdn.net/v/oceans.mp4. The hosted build bundles that same demo clip locally.
