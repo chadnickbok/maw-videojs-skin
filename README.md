@@ -62,8 +62,9 @@ keeps the ribs in proportion when the controls fold into two rows below 560px
 of **player** width. The outer frame uses nine-slice mapping; connecting membrane
 absorbs changes in width and height without stretching the foreground organs.
 
-- The sternum valve has 15 authored contraction poses. Inflated means pause;
-  contracted reveals play. Reversing playback reverses from the current pose.
+- The living iris has 30 authored poses. Its membrane petals close while playing
+  and open to reveal the amber Play membrane when paused. A one-second
+  transition reverses from the current pose, including rapid toggles.
 - The volume bellows have 15 inflation poses. Pushing the bone left increases
   actual Web Audio gain. Muting preserves the previous level.
 - The larva has a nine-pose squirm cycle. Dragging accelerates it, and its local
@@ -91,5 +92,12 @@ Canvas fallback; WebGL appearance and physical iOS output remain unverified.
 ![Wide Thorax player](docs/thorax/wide.jpg)
 
 ![Compact Thorax player](docs/thorax/phone.jpg)
+
+The approved iris study is integrated in `dist/tissue/thorax-iris-v3.webp`
+(six columns by five rows). A cached canvas matte removes the surrounding dark
+backdrop while preserving the cavity shadow. The same scene supplies breathing,
+contact light, and keyboard focus.
+
+![Integrated Thorax iris](docs/thorax/iris-integrated.jpg)
 
 The public repository streams the demo from https://vjs.zencdn.net/v/oceans.mp4. The hosted build bundles that same demo clip locally.

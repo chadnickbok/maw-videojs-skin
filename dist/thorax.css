@@ -41,6 +41,6 @@
 #player.thoracic:fullscreen .window{flex:1;min-height:0;aspect-ratio:auto}
 #player.thoracic:fullscreen .organs{flex:none;width:100%}
 .thoracic:not(.thorax-ready):before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:url('./tissue/thorax-body-v2.webp') center/100% 100% no-repeat}
-.thoracic:not(.thorax-ready) #play{background:url('./tissue/thorax-valve-v2.webp') 100% 100% / 500% 300% no-repeat}
+.thoracic:not(.thorax-ready) #play{background:url('./tissue/thorax-iris-v3.webp') 100% 100% / 600% 500% no-repeat}
 .thoracic #symbol{visibility:hidden}
 @container thorax (max-width:560px){.thoracic:not(.thorax-ready):before{background-image:url('./tissue/thorax-compact-v2.webp')}}

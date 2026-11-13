@@ -69,3 +69,21 @@ cell bounds, encodes WebP and assembles GIF studies; it does not paint anatomy.
 
 The GIFs show the authored sprite studies. They are not recordings of the final
 renderer, which also supplies shared breathing, spatial deformation and light.
+
+## Approved iris integration
+
+The original 15-pose sternum study has been superseded in the live player by
+the approved 30-pose alien iris animation. The atlas is
+`../../dist/tissue/thorax-iris-v3.webp` (6 columns, 5 rows). Playing closes the
+membrane petals; pausing opens them to reveal the amber triangular tissue film.
+The state animation uses constant-speed reversible travel rather than restarting
+on each activation. Reduced-motion mode selects the endpoint immediately.
+
+The atlas uses the approved stabilized animation frames, encoded as WebP.
+Its background is matted once by the renderer, with the interior cavity excluded
+from the matte so the depth shadow survives. The shared Thorax scene then adds
+ambient breathing, contact shadows and amber light.
+
+Browser review confirmed the open/closed endpoints, mouse and keyboard activation,
+rapid state changes, and narrow/extended layouts. The browser used Canvas; the
+existing WebGL enhancement still needs device verification.

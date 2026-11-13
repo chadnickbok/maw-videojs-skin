@@ -110,7 +110,8 @@ export function createThorax(player, media, seek, volume) {
     ink.save();ink.globalAlpha=alpha;ink.drawImage(blend,x,y,w,h);ink.restore();
   }
   function organ(name,pose,rect) {
-    const aspect=(images[name].width/5)/(images[name].height/3);
+    const cols=name==='valve'?6:5,rows=name==='valve'?5:3,count=cols*rows;
+    const aspect=(images[name].width/cols)/(images[name].height/rows);
     let w=rect.w,h=w/aspect;if(h>rect.h*1.15){h=rect.h*1.15;w=h*aspect;}
     const breath=ambient&&!reduced.matches?Math.sin(respiration+(name==='valve'?0:.55))*.012:0;
     const squeeze=contact===name?pressure*.045:0;
@@ -118,7 +119,7 @@ export function createThorax(player, media, seek, volume) {
     const x=rect.x+(rect.w-w)/2,y=rect.y+(rect.h-h)/2;
     glow(rect.x+rect.w*.48,rect.y+rect.h*.63,w*.65,h*.60,name==='valve'?.08:.10+inflation*.05);
     ink.save();ink.shadowColor='#000b';ink.shadowBlur=6;ink.shadowOffsetY=3;
-    sprite(name,pose*14,5,3,x,y,w,h);ink.restore();
+    sprite(name,pose*(count-1),cols,rows,x,y,w,h);ink.restore();
     if(focused===name)glow(rect.x+rect.w/2,rect.y+rect.h/2,w*.60,h*.60,.18);
   }
   function channel(now) {
@@ -167,8 +168,11 @@ export function createThorax(player, media, seek, volume) {
   function render(now) {
     raf=0;if(!enabled||document.hidden||!ready)return;
     if(prior&&now-prior<32){schedule();return;}
-    const dt=Math.min(.05,(now-(prior||now))/1000),life=ambient&&!reduced.matches?1:0;
-    valve=reduced.matches?(media.paused?1:0):ease(valve,media.paused||media.ended?1:0,dt,9);
+    const elapsed=(now-(prior||now))/1000;
+    const dt=Math.min(.05,elapsed),life=ambient&&!reduced.matches?1:0;
+    const valveTarget=media.paused||media.ended?1:0;
+    const valveStep=Math.min(elapsed,.25)/1.0; // 30 authored poses over one second, reversible in place
+    valve=reduced.matches?valveTarget:valve+Math.sign(valveTarget-valve)*Math.min(Math.abs(valveTarget-valve),valveStep);
     inflation=reduced.matches?Number(volume.value)/100:ease(inflation,Number(volume.value)/100,dt,14);
     pressure=ease(pressure,dragging||contact?1:0,dt,14);
     respiration+=dt*.9*life;phase+=dt*(reduced.matches?0:dragging?10:ambient?1.6:0);
@@ -182,7 +186,7 @@ export function createThorax(player, media, seek, volume) {
     channel(now);organ('bellows',inflation,l);organ('valve',valve,v);
     if(ripple>0)glow(rippleOrigin,rects.organs.y+rects.organs.h*.5,35+(1-ripple)*100,35,ripple*.07);
     present(now,life);player.classList.add('thorax-ready');prior=now;
-    player.dataset.thoraxPose=String(Math.round(valve*14));player.dataset.thoraxVolume=String(Math.round(inflation*100));
+    player.dataset.thoraxPose=String(Math.round(valve*29));player.dataset.thoraxValve='iris-30';player.dataset.thoraxVolume=String(Math.round(inflation*100));
     if(life||Math.abs(valve-(media.paused?1:0))>.001||Math.abs(inflation-Number(volume.value)/100)>.001||pressure>.001||ripple>0)schedule();
   }
   function schedule(){if(!raf&&enabled&&ready&&!document.hidden)raf=requestAnimationFrame(render);}
@@ -226,11 +230,29 @@ export function createThorax(player, media, seek, volume) {
   document.addEventListener('visibilitychange',()=>{prior=0;schedule();});
   reduced.addEventListener('change',schedule);
   new ResizeObserver(()=>{if(enabled){measure();schedule();}}).observe(player);
+  function prepareValveMatte(){
+    const atlas=images.valve,matte=document.createElement('canvas');
+    matte.width=atlas.width;matte.height=atlas.height;
+    const c=matte.getContext('2d');c.drawImage(atlas,0,0);
+    const pixels=c.getImageData(0,0,matte.width,matte.height),data=pixels.data;
+    const cw=matte.width/6,ch=matte.height/5;
+    for(let y=0;y<matte.height;y++)for(let x=0;x<matte.width;x++){
+      const u=(x%cw)/cw,v=(y%ch)/ch;
+      const radius=Math.hypot((u-.50)/.50,(v-.47)/.43);
+      if(radius<.86)continue;
+      const i=(y*matte.width+x)*4;
+      const key=clamp((Math.max(data[i],data[i+1],data[i+2])-8)/30);
+      const edge=clamp((radius-.86)/.14);
+      data[i+3]=Math.round(255*(1-edge+edge*key));
+    }
+    c.putImageData(pixels,0,0);images.valve=matte;
+  }
   function load(){
   if(loading)return;loading=true;
   Promise.all(['body','compact','valve','bellows','larva','channel'].map(name=>new Promise((resolve,reject)=>{
-    const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;im.src='./tissue/thorax-'+name+'-v2.webp';
+    const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;im.src=name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
+    prepareValveMatte();
     try{initialize();}catch(error){player.dataset.thoraxRenderError=error.message;useFallback();}
     canvas.addEventListener('webglcontextlost',lost);ready=true;measure();schedule();
   }).catch(()=>{player.dataset.thoraxRenderError='Artwork could not load';});
