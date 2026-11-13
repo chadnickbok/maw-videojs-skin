@@ -80,3 +80,11 @@ restoration, and the smaller play control. Canvas was verified; physical iOS and
 WebGL appearance remain unverified.
 
 ![Refined composition](firm-phone.jpg)
+
+## Sac-only volume control
+
+The dangling appendage and its recoil simulation have been removed. Only the
+sac membranes fill and empty; the head, shell and legs remain fixed. The tendon
+texture is no longer loaded. Left-to-right interaction, mute restoration and
+quick membrane easing are unchanged. The motion test now verifies filling,
+emptying, render scheduling until settled, and reduced-motion behavior.

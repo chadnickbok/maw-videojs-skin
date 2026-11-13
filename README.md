@@ -66,7 +66,7 @@ absorbs changes in width and height without stretching the foreground organs.
   and open to reveal the amber Play membrane when paused. A one-second
   transition reverses from the current pose, including rapid toggles.
 - The volume creature has a fixed shell, head and legs, independently animated
-  membranes, and a continuous textured appendage with spring recoil. Click or
+  membranes that fill and empty with the volume level. Click or
   drag across its sacs: right increases actual Web Audio gain, left decreases it.
   The head toggles mute and restores the previous level.
 - The scrubber extracts a continuous worm through stationary ribs. Its skin is

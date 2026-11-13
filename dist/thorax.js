@@ -231,9 +231,9 @@ export function createThorax(player, media, seek, volume) {
   }
   function load(){
   if(loading)return;loading=true;
-  Promise.all(['body','compact','valve','volumeShell','volumeSacs','volumeTendon','channel','wormSkin','wormHead','wormCage'].map(name=>new Promise((resolve,reject)=>{
+  Promise.all(['body','compact','valve','volumeShell','volumeSacs','channel','wormSkin','wormHead','wormCage'].map(name=>new Promise((resolve,reject)=>{
     const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;
-    const paths={volumeShell:'volume-shell-v2',volumeSacs:'volume-sacs-v2',volumeTendon:'volume-tendon-v2',wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
+    const paths={volumeShell:'volume-shell-v2',volumeSacs:'volume-sacs-v2',wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
     im.src=name.startsWith('volume')?'./tissue/thorax-'+paths[name]+'.webp':paths[name]?'./tissue/thorax-'+paths[name]+(name==='wormHead'?'-v3.webp':'-v1.webp'):name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
     for(const name of ['body','compact','wormCage']){
