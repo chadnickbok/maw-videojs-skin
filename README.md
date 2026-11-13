@@ -1,4 +1,4 @@
-# Maw — living Video.js skins
+# Viscera — living Video.js skins
 
 An experimental biomechanical player with four skins: Maw, Leech, Thorax, and Chrysalis.
 
@@ -54,4 +54,42 @@ The preview browser disables WebGL, so browser verification covered the Canvas f
 
 The bundled Oceans clip is the Video.js demonstration video. Video.js is third-party open-source software. Artwork was generated with image generation tools and prepared through several reference-guided passes.
 
-The public repository streams Oceans from the Video.js CDN. The hosted site uses a bundled copy for reliability. The demo media binary is omitted from this repository.
+## Thorax: costal reflex
+
+Thorax is rebuilt as one composited organism. Its ivory skeleton and tendon bed
+share a single scene with the moving organs. A separate compact body painting
+keeps the ribs in proportion when the controls fold into two rows below 560px
+of **player** width. The outer frame uses nine-slice mapping; connecting membrane
+absorbs changes in width and height without stretching the foreground organs.
+
+- The sternum valve has 15 authored contraction poses. Inflated means pause;
+  contracted reveals play. Reversing playback reverses from the current pose.
+- The volume bellows have 15 inflation poses. Pushing the bone left increases
+  actual Web Audio gain. Muting preserves the previous level.
+- The larva has a nine-pose squirm cycle. Dragging accelerates it, and its local
+  pressure parts the continuous tendon painting. Each source position is unique;
+  the channel is never constructed from repeated images.
+- All organs share a slow respiratory phase, localized contact shadows, and
+  amber spill light on the surrounding tissue, even while paused.
+- A WebGL post pass adds warm bloom and local soft-tissue displacement. The
+  Canvas renderer retains the full artwork, deformation and control behavior.
+- Sprite frames blend on a separate premultiplied surface so interpolation
+  doesn't dim their shared pixels. Rendering is capped near 30fps, with DPR
+  capped at 1.65, and stops when inactive, hidden, or resting with motion off.
+- Real buttons and sliders remain accessible underneath the scene. Native
+  pointer capture supports dragging; keyboard focus illuminates the anatomy.
+
+Implementation: `dist/thorax.js`, `dist/thorax.css`, and
+`dist/tissue/thorax-*-v2.webp`. Production studies and generation specifications
+are in [docs/thorax](docs/thorax/production.md).
+
+Review covered live resizing from 320–1440px viewport width, compact/extended
+layout changes, pointer dragging, seeking, play/pause, volume during playback,
+mute restoration, and switching between Maw and Thorax. The browser used the
+Canvas fallback; WebGL appearance and physical iOS output remain unverified.
+
+![Wide Thorax player](docs/thorax/wide.jpg)
+
+![Compact Thorax player](docs/thorax/phone.jpg)
+
+The public repository streams the demo from https://vjs.zencdn.net/v/oceans.mp4. The hosted build bundles that same demo clip locally.
