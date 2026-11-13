@@ -36,8 +36,9 @@ a decaying contraction wave. Quiet ambient movement remains while paused.
 Reduced motion resets the simulation to a stable state.
 
 The registered head poses blend on a cached premultiplied canvas, with a soft
-neck matte. Rear neck and body draw behind the fixed cage; the blunt leading tip
-draws in front to remain a visible grip. The existing continuous tendon painting
+neck matte. The complete head, neck and body draw behind the fixed cage, so every rib
+consistently occludes the worm. The skin extends beneath the full extraction
+socket and a feathered elliptical cavity shadow softens its entry. The existing continuous tendon painting
 provides deformable tube lining. Contact shadows, amber spill and fine adhesive
 threads join the layers in the shared Thorax scene.
 

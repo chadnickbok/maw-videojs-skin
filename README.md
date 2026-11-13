@@ -71,8 +71,8 @@ absorbs changes in width and height without stretching the foreground organs.
   mapped back from the head, so markings feed out of the socket instead of
   stretching across the visible length. Pulling thins the neck; pushing gathers
   the body; release sends a damped contraction back through the tissue.
-- Nine registered head poses blend into the continuous body. The neck passes
-  behind the ribs while the leading tip remains visible as the drag target.
+- Nine registered head poses blend into the continuous body. The whole head and neck pass
+  behind the ribs, preserving consistent depth through every opening.
 - All organs share a slow respiratory phase, localized contact shadows, and
   amber spill light on the surrounding tissue, even while paused.
 - A WebGL post pass adds warm bloom and local soft-tissue displacement. The

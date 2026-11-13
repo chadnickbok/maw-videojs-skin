@@ -59,9 +59,13 @@ export function createThoraxWorm(images,player) {
       }
     }c.restore();
 
-    const count=Math.max(2,Math.ceil(bodyLength/5)),nodes=[];
+    // Feed the skin underneath the full rounded socket, rather than starting
+    // it at a visible vertical cut through the socket window.
+    const renderStart=r.x+r.w*.012;
+    const renderLength=Math.max(0,bodyEnd-renderStart);
+    const count=Math.max(2,Math.ceil(renderLength/5)),nodes=[];
     for(let i=0;i<=count;i++){
-      const x=bodyStart+bodyLength*i/count,q=clamp((join-x)/materialLength),s=motion.sample(q);
+      const x=renderStart+renderLength*i/count,q=clamp((join-x)/materialLength),s=motion.sample(q);
       const radius=m.diameter*.5*s.radius;
       // Radial wrinkles live in material coordinates and move with the worm.
       const wrinkles=reduced?0:Math.sin(q*materialLength*1.04+Math.sin(q*17))*.035;
@@ -88,9 +92,15 @@ export function createThoraxWorm(images,player) {
     }
     // Draw the generated soft head at the mesh's leading end, never detached.
     halo(c,gx,cy,m.headWidth*.7,m.diameter*1.4,.10+Math.abs(motion.tension)*.1+pulse);
-    const gripSplit=gx-m.headWidth*.08;
-    c.save();c.beginPath();c.rect(r.x,cy-cageH,Math.max(0,gripSplit-r.x),cageH*2);c.clip();
-    drawHead(c,gx,cy,m.headWidth,reduced);c.restore();
+    drawHead(c,gx,cy,m.headWidth,reduced);
+    // A feathered cavity shadow wraps the entering tissue. The root is never
+    // hidden by a rectangular fill or a clipped sprite edge.
+    c.save();c.translate(r.x+r.w*.008,cy);c.scale(r.w*.085,cageH*.35);
+    const socketShade=c.createRadialGradient(0,0,.12,0,0,1);
+    socketShade.addColorStop(0,'#080604f5');
+    socketShade.addColorStop(.42,'#100b07ce');
+    socketShade.addColorStop(1,'#100b0700');
+    c.fillStyle=socketShade;c.beginPath();c.arc(0,0,1,0,Math.PI*2);c.fill();c.restore();
 
     // Adhesive threads are attached to the lining and the current body surface.
     c.save();c.lineWidth=.65;
@@ -106,12 +116,6 @@ export function createThoraxWorm(images,player) {
     // Cage is painted LAST and is pinned to the player, occluding actual tissue.
     c.save();c.shadowColor='#080501b3';c.shadowBlur=2;c.shadowOffsetY=2;
     c.drawImage(cage,r.x,cageY,r.w,cageH);c.restore();
-    // The blunt leading tip lifts in front as a visible grip; its attached neck
-    // remains behind the cage, so the body still threads through the ribs.
-    c.save();c.beginPath();c.rect(gripSplit,cy-cageH,r.x+r.w-gripSplit,cageH*2);c.clip();
-    drawHead(c,gx,cy,m.headWidth,reduced);c.restore();
-    // Dark socket lip hides where fresh material enters the visible channel.
-    c.save();c.strokeStyle='#24190fe6';c.lineWidth=2.5;c.beginPath();c.ellipse(sourceMouth,cy,m.headWidth*.13,cageH*.23,-.10,-Math.PI*.48,Math.PI*.48);c.stroke();c.restore();
     if(focused)halo(c,gx,cy,m.headWidth*.8,cageH*.50,.16);
     player.dataset.thoraxProgress=String(Math.round(progress*100));
     player.dataset.wormLength=bodyLength.toFixed(1);player.dataset.wormTension=motion.tension.toFixed(3);
