@@ -76,3 +76,11 @@ with a fixed neck, consistent translucent beige anatomy and amber organ
 positions, subtle head contractions and probing feelers, a near-matching first
 and last pose, and no bones, background, labels or scenery. The original head
 was the anatomy reference; the previous atlas supplied attachment/layout only.
+
+## Forward probing feelers
+
+The v3 head atlas retains the nine poses and original anatomy, but directs
+the four upper mouth feelers forward along the tube. Their shallow arc stays
+close to the top of the fleshy head instead of rising out of the ribcage.
+The image-generation edit preserved scale, fixed neck attachment, amber organs,
+transparency and cell layout; only the feelers' direction and length changed.
