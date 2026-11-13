@@ -67,9 +67,12 @@ absorbs changes in width and height without stretching the foreground organs.
   transition reverses from the current pose, including rapid toggles.
 - The volume bellows have 15 inflation poses. Pushing the bone left increases
   actual Web Audio gain. Muting preserves the previous level.
-- The larva has a nine-pose squirm cycle. Dragging accelerates it, and its local
-  pressure parts the continuous tendon painting. Each source position is unique;
-  the channel is never constructed from repeated images.
+- The scrubber extracts a continuous worm through stationary ribs. Its skin is
+  mapped back from the head, so markings feed out of the socket instead of
+  stretching across the visible length. Pulling thins the neck; pushing gathers
+  the body; release sends a damped contraction back through the tissue.
+- Nine registered head poses blend into the continuous body. The neck passes
+  behind the ribs while the leading tip remains visible as the drag target.
 - All organs share a slow respiratory phase, localized contact shadows, and
   amber spill light on the surrounding tissue, even while paused.
 - A WebGL post pass adds warm bloom and local soft-tissue displacement. The
@@ -99,5 +102,13 @@ backdrop while preserving the cavity shadow. The same scene supplies breathing,
 contact light, and keyboard focus.
 
 ![Integrated Thorax iris](docs/thorax/iris-integrated.jpg)
+
+## Thorax worm extraction
+
+Implementation: `dist/thorax-worm.js` and `dist/worm-motion.js`. Generated art,
+rendering decisions, and verification are documented in
+[worm production notes](docs/thorax/worm/production.md).
+
+![Extraction at 0, 25 and 80 percent](docs/thorax/worm/extraction-states.jpg)
 
 The public repository streams the demo from https://vjs.zencdn.net/v/oceans.mp4. The hosted build bundles that same demo clip locally.

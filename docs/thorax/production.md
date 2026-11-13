@@ -87,3 +87,9 @@ ambient breathing, contact shadows and amber light.
 Browser review confirmed the open/closed endpoints, mouse and keyboard activation,
 rapid state changes, and narrow/extended layouts. The browser used Canvas; the
 existing WebGL enhancement still needs device verification.
+
+## Continuous worm revision
+
+The old larva scrubber has been superseded by a continuous extracted worm and
+a stationary skeletal cage. See [worm production notes](worm/production.md)
+for the generated assets, material mapping, spring mechanics and browser QA.

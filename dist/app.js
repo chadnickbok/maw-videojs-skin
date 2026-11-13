@@ -11,7 +11,7 @@ const mawScrubber = createMawScrubber($('#timeline'), seek, media);
 const mawVolume = createMawVolume($('#gills'), volume, media);
 const thorax = createThorax($('#player'),media,seek,volume);
 const specimens = [
- {id:'thorax',accent:'#f3bd70',ink:'#423524',cycle:5.8,title:'Costal reflex',note:'Press the living iris: its membrane petals close for pause and open to reveal play. Draw the amber larva through the tendon channel; the membrane parts around it. Push the bone left to inflate the bellows. Every organ shares the same breath.'},
+ {id:'thorax',accent:'#f3bd70',ink:'#423524',cycle:5.8,title:'Costal reflex',note:'Press the living iris: its membrane petals close for pause and open to reveal play. Pull the worm out through its ribbed tube. Its body stretches under tension, bunches on return, and feeds back into the socket. Push the bone left to inflate the bellows. Every organ shares the same breath.'},
  {id:'leech',accent:'#82e6df',ink:'#233c37',cycle:4.7,title:'Branchial reflex',note:'Pull the tendril to spread the gills. The eel follows your drag through a fluid channel, trailing cold light.'},
  {id:'chrysalis',accent:'#e7cc97',ink:'#493d49',cycle:7.2,title:'Pupal membrane',note:'Roll the luminous egg along the centipede. Its legs ripple in sequence as silk stretches around the volume antenna.'},
  {id:'maw',accent:'#fa978b',ink:'#442829',cycle:3.9,title:'Mandibular groove',note:'Draw the grub between the lips. The groove opens around its shell and contracts behind it. Press the paired cushions to pause. Push the bone left to inflate the sacs and increase volume.'}
@@ -56,6 +56,7 @@ async function toggle(){if(!media.paused){media.pause();return}try{audio.unlock(
 $('#play').onclick=toggle;$('.window').onclick=e=>{if(!e.target.closest('button'))toggle()};
 for(const e of ['timeupdate','loadedmetadata','play','pause','volumechange','audiolevelchange','ended','seeked'])media.addEventListener(e,sync);
 media.addEventListener('playing',()=>{$('#player').classList.add('started');$('#notice').textContent=''});
+media.addEventListener('seeked',()=>{if(media.currentTime>0)$('#player').classList.add('started')});
 media.addEventListener('error',()=>{if(!media.src.includes('zencdn')){media.src='https://vjs.zencdn.net/v/oceans.mp4'}else{$('#notice').textContent='The demo video could not load.'}});
 seek.oninput=()=>{if(Number.isFinite(media.duration)) media.currentTime=media.duration*seek.value/1000};
 volume.oninput=()=>{audio.set(Number(volume.value)/100);sync()};

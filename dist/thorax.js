@@ -1,3 +1,4 @@
+import { createThoraxWorm } from './thorax-worm.js';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = (v, target, dt, rate) => v + (target - v) * (1 - Math.exp(-dt * rate));
 
@@ -11,11 +12,12 @@ export function createThorax(player, media, seek, volume) {
   const blend = document.createElement('canvas'), mixInk = blend.getContext('2d');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const images = {};
+  const worm = createThoraxWorm(images,player);
   let enabled = false, ambient = true, ready = false, loading = false, raf = 0, prior = 0;
   let gl, program, texture, fallback, width = 1, height = 1, dpr = 1;
   let valve = media.paused ? 1 : 0, inflation = Number(volume.value) / 100;
   let pressure = 0, contact = '', dragging = false, seekPointer = null, volumePointer = null;
-  let startX = 0, startVolume = 0, velocity = 0, lastSeek = 0, phase = 0, respiration = 0;
+  let startX = 0, startVolume = 0, respiration = 0;
   let ripple = 0, rippleOrigin = 0, focused = '';
   const rects = {};
 
@@ -122,36 +124,6 @@ export function createThorax(player, media, seek, volume) {
     sprite(name,pose*(count-1),cols,rows,x,y,w,h);ink.restore();
     if(focused===name)glow(rect.x+rect.w/2,rect.y+rect.h/2,w*.60,h*.60,.18);
   }
-  function channel(now) {
-    const r=rects.rail,im=images.channel;
-    const grubW=clamp(r.w*.28,58,112), margin=grubW*.60,travel=Math.max(1,r.w-margin*2);
-    const p=Number(seek.value)/1000,gx=r.x+margin+p*travel,gy=r.y+r.h*.50;
-    const difference=p-lastSeek;velocity=ease(velocity,difference*travel/Math.max(.016,(now-prior)/1000),.033,6);lastSeek=p;
-    const h=clamp(r.w/5.8,35,74),y=gy-h/2;
-    // Every strip samples its own unique source coordinates: no repeating tiles.
-    const strips=96, sw=im.width/strips;
-    const strength=ambient&&!reduced.matches?Math.sin(respiration)*1.2:0;
-    for(const lower of [false,true])for(let i=0;i<strips;i++){
-      const u=(i+.5)/strips,x=r.x+u*r.w,local=Math.exp(-Math.pow((x-gx)/(grubW*.5),2));
-      const opening=local*(5+pressure*6),wave=strength*Math.sin(u*Math.PI);
-      ink.drawImage(im,i*sw,lower?im.height*.5:0,sw+.5,im.height*.5,
-        r.x+i*r.w/strips,y+(lower?h/2+opening:-opening)+wave,r.w/strips+.4,h/2);
-    }
-    // A capillary fills behind the larva, and spills light onto the same mantle.
-    const start=r.x+margin*.4;
-    glow(gx,gy,grubW*.8,28,.19+pressure*.09);
-    ink.save();ink.lineCap='round';
-    for(const [color,line,blur] of [['#8e4c16',5,12],['#edac49',2.1,5],['#ffe5a4',.7,0]]){
-      ink.strokeStyle=color;ink.lineWidth=line;ink.shadowColor='#e4a241';ink.shadowBlur=blur;
-      ink.beginPath();ink.moveTo(start,gy);ink.bezierCurveTo(start+(gx-start)*.3,gy+strength,start+(gx-start)*.7,gy-strength,gx,gy);ink.stroke();
-    }ink.restore();
-    const gh=grubW/(images.larva.width/3*3/images.larva.height); // cell aspect, 3 by 3
-    const tilt=clamp(velocity/1200,-.08,.08),squirm=ambient&&!reduced.matches?Math.sin(phase*.8)*1.3:0;
-    ink.save();ink.translate(gx,gy-h*.04+squirm);ink.rotate(tilt);ink.shadowColor='#070402';ink.shadowBlur=6;ink.shadowOffsetY=5;
-    sprite('larva',phase%8,3,3,-grubW/2,-gh*.64,grubW,gh);ink.restore();
-    if(focused==='rail')glow(r.x+r.w/2,gy,r.w*.52,32,.12);
-    player.dataset.thoraxProgress=String(Math.round(p*100));
-  }
   function present(now,life) {
     if(gl){
       gl.viewport(0,0,canvas.width,canvas.height);gl.useProgram(program);gl.bindTexture(gl.TEXTURE_2D,texture);
@@ -165,6 +137,7 @@ export function createThorax(player, media, seek, volume) {
       gl.uniform1f(gl.getUniformLocation(program,'pressure'),pressure);gl.drawArrays(gl.TRIANGLES,0,6);
     }else{fallback.clearRect(0,0,canvas.width,canvas.height);fallback.drawImage(scene,0,0);}
   }
+  function liveMotion(){return ambient&&!reduced.matches;}
   function render(now) {
     raf=0;if(!enabled||document.hidden||!ready)return;
     if(prior&&now-prior<32){schedule();return;}
@@ -175,7 +148,7 @@ export function createThorax(player, media, seek, volume) {
     valve=reduced.matches?valveTarget:valve+Math.sign(valveTarget-valve)*Math.min(Math.abs(valveTarget-valve),valveStep);
     inflation=reduced.matches?Number(volume.value)/100:ease(inflation,Number(volume.value)/100,dt,14);
     pressure=ease(pressure,dragging||contact?1:0,dt,14);
-    respiration+=dt*.9*life;phase+=dt*(reduced.matches?0:dragging?10:ambient?1.6:0);
+    respiration+=dt*.9*life;
     ripple=Math.max(0,ripple-dt*1.4);
     ink.setTransform(dpr,0,0,dpr,0,0);ink.clearRect(0,0,width,height);
     nineSlice();
@@ -183,11 +156,11 @@ export function createThorax(player, media, seek, volume) {
     const breath=Math.sin(respiration)*life;
     tendon([v.x+v.w*.7,v.y+v.h*.52],[r.x+14,r.y+r.h*.5],folded?28:breath*2,folded?1.3:1.8);
     tendon([r.x+r.w-12,r.y+r.h*.50],[l.x+l.w*.25,l.y+l.h*.5],folded?-20:breath*-2,folded?1.3:1.8);
-    channel(now);organ('bellows',inflation,l);organ('valve',valve,v);
+    worm.draw(ink,r,{progress:Number(seek.value)/1000,dt:Math.min(elapsed,.1),time:now/1000,dragging:seekPointer!==null,ambient:liveMotion(),reduced:reduced.matches,focused:focused==='rail'});organ('bellows',inflation,l);organ('valve',valve,v);
     if(ripple>0)glow(rippleOrigin,rects.organs.y+rects.organs.h*.5,35+(1-ripple)*100,35,ripple*.07);
     present(now,life);player.classList.add('thorax-ready');prior=now;
     player.dataset.thoraxPose=String(Math.round(valve*29));player.dataset.thoraxValve='iris-30';player.dataset.thoraxVolume=String(Math.round(inflation*100));
-    if(life||Math.abs(valve-(media.paused?1:0))>.001||Math.abs(inflation-Number(volume.value)/100)>.001||pressure>.001||ripple>0)schedule();
+    if(life||worm.active||Math.abs(valve-(media.paused?1:0))>.001||Math.abs(inflation-Number(volume.value)/100)>.001||pressure>.001||ripple>0)schedule();
   }
   function schedule(){if(!raf&&enabled&&ready&&!document.hidden)raf=requestAnimationFrame(render);}
   function touched(name){contact=name;ripple=1;rippleOrigin=rects[name]?.x+rects[name]?.w/2||width/2;schedule();}
@@ -197,9 +170,9 @@ export function createThorax(player, media, seek, volume) {
     node.addEventListener('blur',()=>{focused='';schedule();});
   }
   function scrub(event){
-    const r=rects.rail,g=clamp(r.w*.28,58,112),m=g*.60;
-    const left=player.getBoundingClientRect().left+r.x;
-    seek.value=String(Math.round(clamp((event.clientX-left-m)/Math.max(1,r.w-2*m))*1000));
+    const r=rects.rail,m=worm.metrics(r);
+    const left=player.getBoundingClientRect().left;
+    seek.value=String(Math.round(clamp((event.clientX-left-m.start)/m.travel)*1000));
     seek.dispatchEvent(new Event('input',{bubbles:true}));schedule();
   }
   seek.addEventListener('pointerdown',e=>{
@@ -229,7 +202,7 @@ export function createThorax(player, media, seek, volume) {
   for(const e of ['play','pause','ended','timeupdate','seeked','audiolevelchange','volumechange'])media.addEventListener(e,schedule);
   document.addEventListener('visibilitychange',()=>{prior=0;schedule();});
   reduced.addEventListener('change',schedule);
-  new ResizeObserver(()=>{if(enabled){measure();schedule();}}).observe(player);
+  new ResizeObserver(()=>{if(enabled){prior=0;measure();schedule();}}).observe(player);
   function prepareValveMatte(){
     const atlas=images.valve,matte=document.createElement('canvas');
     matte.width=atlas.width;matte.height=atlas.height;
@@ -249,17 +222,19 @@ export function createThorax(player, media, seek, volume) {
   }
   function load(){
   if(loading)return;loading=true;
-  Promise.all(['body','compact','valve','bellows','larva','channel'].map(name=>new Promise((resolve,reject)=>{
-    const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;im.src=name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
+  Promise.all(['body','compact','valve','bellows','channel','wormSkin','wormHead','wormCage'].map(name=>new Promise((resolve,reject)=>{
+    const im=images[name]=new Image();im.onload=resolve;im.onerror=reject;
+    const paths={wormSkin:'worm-skin',wormHead:'worm-head',wormCage:'worm-cage'};
+    im.src=paths[name]?'./tissue/thorax-'+paths[name]+'-v1.webp':name==='valve'?'./tissue/thorax-iris-v3.webp':'./tissue/thorax-'+name+'-v2.webp';
   }))).then(()=>{
-    prepareValveMatte();
+    prepareValveMatte();worm.prepare();
     try{initialize();}catch(error){player.dataset.thoraxRenderError=error.message;useFallback();}
     canvas.addEventListener('webglcontextlost',lost);ready=true;measure();schedule();
   }).catch(()=>{player.dataset.thoraxRenderError='Artwork could not load';});
   }
   return {
     select(active){enabled=active;player.classList.toggle('thoracic',active);canvas.hidden=!active;release();
-      if(active){load();volume.dir='rtl';volume.title='Push the bone left to inflate · louder';valve=media.paused?1:0;inflation=Number(volume.value)/100;lastSeek=Number(seek.value)/1000;prior=0;measure();schedule();}
+      if(active){load();volume.dir='rtl';volume.title='Push the bone left to inflate · louder';valve=media.paused?1:0;inflation=Number(volume.value)/100;worm.reset(Number(seek.value)/1000);prior=0;measure();schedule();}
     },
     motion(active){ambient=active;schedule();}
   };
