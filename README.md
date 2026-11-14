@@ -1,6 +1,6 @@
 # Viscera — living Video.js skins
 
-An experimental biomechanical player with four skins: Maw, Leech, Thorax, and Chrysalis.
+An experimental biomechanical player with two skins: Maw and Thorax.
 
 [Open the hosted player](https://living-specimens.nickchadwick187.chatgpt.site)
 

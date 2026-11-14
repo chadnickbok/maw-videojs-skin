@@ -12,8 +12,6 @@ const mawVolume = createMawVolume($('#gills'), volume, media);
 const thorax = createThorax($('#player'),media,seek,volume);
 const specimens = [
  {id:'thorax',accent:'#f3bd70',ink:'#423524',cycle:5.8,title:'Costal reflex',note:'Press the living iris: its membrane petals close for pause and open to reveal play. Pull the worm out through its ribbed tube. Its body stretches under tension, bunches on return, and feeds back into the socket. Drag across the amber sacs from left to right to get louder. The sacs fill and empty inside their fixed skeleton. Tap the creature’s head to mute. Every organ shares the same breath.'},
- {id:'leech',accent:'#82e6df',ink:'#233c37',cycle:4.7,title:'Branchial reflex',note:'Pull the tendril to spread the gills. The eel follows your drag through a fluid channel, trailing cold light.'},
- {id:'chrysalis',accent:'#e7cc97',ink:'#493d49',cycle:7.2,title:'Pupal membrane',note:'Roll the luminous egg along the centipede. Its legs ripple in sequence as silk stretches around the volume antenna.'},
  {id:'maw',accent:'#fa978b',ink:'#442829',cycle:3.9,title:'Mandibular groove',note:'Draw the grub between the lips. The groove opens around its shell and contracts behind it. Press the paired cushions to pause. Push the bone left to inflate the sacs and increase volume.'}
 ];
 const images = {};
@@ -34,12 +32,12 @@ function select(s){
  body.setProperty('--accent',s.accent); body.setProperty('--ink',s.ink);body.setProperty('--cycle',s.cycle+'s');
  for(const part of ['dock','pause','frame']) body.setProperty('--'+part,'url(tissue/'+s.id+'-'+part+'.webp)');
  $('#cover').src='tissue/'+s.id+'-poster.webp'; $('#name').textContent=titleCase(s.id);
- $('#noteTitle').textContent=s.title;$('#desc').textContent=s.note;$('#species').textContent='SPECIMEN '+number(specimens.indexOf(s))+' / 04';
+ $('#noteTitle').textContent=s.title;$('#desc').textContent=s.note;$('#species').textContent='SPECIMEN '+number(specimens.indexOf(s))+' / '+number(specimens.length);
  for(const b of document.querySelectorAll('.item')){const on=b.dataset.id===s.id;b.setAttribute('aria-pressed',on);b.querySelector('.dot').textContent=on?'●':''}
  $('#mute').textContent=['maw','thorax'].includes(s.id)?(audio.muted?'×':'·'):(audio.muted?'×':'◖))');
  history.replaceState(null,'','#'+s.id);
 }
-select(specimens.find(s=>s.id===location.hash.slice(1))||specimens[3]);
+select(specimens.find(s=>s.id===location.hash.slice(1))||specimens[0]);
 function motion(){mawButton.motion(live);mawScrubber.motion(live);mawVolume.motion(live);thorax.motion(live);document.body.classList.toggle('live',live);$('#motion').setAttribute('aria-pressed',live);$('#motion').textContent='◌  Ambient motion '+(live?'on':'off')}
 motion();$('#motion').onclick=()=>{live=!live;motion()};
 function stamp(v){return Math.floor(v/60)+':'+String(Math.floor(v%60)).padStart(2,'0')}
@@ -86,23 +84,20 @@ function drawSeek({ctx:c,width:w,height:h},t,b){
  const y=u=>h*(.52+.055*Math.sin(u*7+t)*(.6+pressure));const size=Math.max(8,Math.min(17,h*.21));const step=Math.max(8,size*1.05);
  for(let j=0;j<w+step;j+=step){
   const u=j/w, near=Math.exp(-Math.abs(j-x)/33),wave=Math.sin(t*1.4-u*11), k=skin.id;
-  if(k==='maw'){for(const side of [-1,1])tissue(c,a.track,j,y(u)+side*(5+near*(6+3*pressure)),step*1.35,size*.59,side*.1)}
-  else{tissue(c,a.track,j,y(u),step*(k==='thorax'?.83:1.3),size*(.93+.09*wave),.12*wave);
-   if(k==='chrysalis'){c.strokeStyle='#cfbac2';c.lineWidth=1.5;c.beginPath();c.moveTo(j+4,y(u)+size*.55);c.quadraticCurveTo(j+8,y(u)+size,j-2+4*wave,y(u)+size*1.45);c.stroke()}}
+  for(const side of [-1,1])tissue(c,a.track,j,y(u)+side*(5+near*(6+3*pressure)),step*1.35,size*.59,side*.1);
  }
  c.save();c.strokeStyle=skin.accent;c.shadowColor=skin.accent;c.shadowBlur=7;c.lineWidth=2;c.beginPath();c.moveTo(0,y(0));for(let j=0;j<x;j+=3)c.lineTo(j,y(j/w));c.stroke();c.restore();
  const float=live?Math.sin(t*2)*1.3:0;
- if(skin.id==='leech'||skin.id==='thorax'){for(let j=8;j>0;j--){let dx=x-j*thumb*.22;tissue(c,a.thumb,dx,y(dx/w)+Math.sin(t*2-j*.6)*(1.7+3*pressure),thumb*(.44-j*.025),size*(.63-j*.055))}}
- tissue(c,a.thumb,x,y(x/w)+float,thumb*(skin.id==='chrysalis'?.73:1),size*(1+.08*b),.08*Math.sin(t)+velocity*.13);
+ tissue(c,a.thumb,x,y(x/w)+float,thumb,size*(1+.08*b),.08*Math.sin(t)+velocity*.13);
  glow(c,x,y(x/w),thumb*1.35,.14+b*.08+pressure*.07)
 }
 function drawVolume({ctx:c,width:w,height:h},t,b){
  if(skin.id==='maw' && $('#gills').classList.contains('maw-bellows-ready'))return;
  if(skin.id==='thorax')return;
- const a=images[skin.id],v=Number(volume.value)/100,n=skin.id==='thorax'?5:8, gap=w/(n+1),mid=h*.53;
+ const a=images[skin.id],v=Number(volume.value)/100,n=8, gap=w/(n+1),mid=h*.53;
  for(let i=0;i<n;i++){const pos=(i+1)/(n+1),opened=Math.max(0,Math.min(1,(v-pos)*n+1)),breath=Math.sin(t*1.2-i*.48);
   const x=(i+1)*gap,y=mid+3*breath;
-  tissue(c,a.volume,x,y,gap*(.63+.13*opened),h*(.18+.14*opened+.018*breath),skin.id==='leech'?.22+.32*opened:breath*.14);
+  tissue(c,a.volume,x,y,gap*(.63+.13*opened),h*(.18+.14*opened+.018*breath),breath*.14);
   glow(c,x,y,gap*1.3,(.06+.18*opened)*(1+.15*b))
  }
  const limbX=7+v*(w-14);
