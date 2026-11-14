@@ -1,6 +1,7 @@
 const clamp = value => Math.max(0, Math.min(1, value));
 
 export function createMawVolume(rail, input, media) {
+  let painted=false;
   let canvas = document.createElement('canvas');
   canvas.className = 'maw-bellows';
   canvas.setAttribute('aria-hidden', 'true');
@@ -111,6 +112,7 @@ export function createMawVolume(rail, input, media) {
       context.drawImage(image,frame%5*sw+2,Math.floor(frame/5)*sh+2,sw-4,sh-4,
         (width-displayWidth)/2,(height-displayHeight)/2,displayWidth,displayHeight);
     }
+    painted=true;
     if(inflation!==target||(ambient&&!reduced.matches))schedule();
   }
   image.onload=()=>{
@@ -160,12 +162,13 @@ export function createMawVolume(rail, input, media) {
   new ResizeObserver(schedule).observe(rail);
   reduced.addEventListener('change',schedule);
   return {
+    get isReady(){return ready&&painted;},
     select(active) {
       enabled=active;pointer=null;previous=0;
       rail.classList.toggle('maw-volume',active);
       input.setAttribute('dir',active?'rtl':'ltr');
       input.title=active?'Push left to inflate · louder':'Volume';
-      if(active){inflation=media.muted?0:Number(input.value)/100;schedule();}
+      if(active){painted=false;inflation=media.muted?0:Number(input.value)/100;schedule();}
     },
     motion(active){ambient=active;schedule();}
   };

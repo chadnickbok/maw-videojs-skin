@@ -1,6 +1,7 @@
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 export function createMawScrubber(rail, input, media) {
+  let painted=false;
   // Each x coordinate samples a unique part of the continuous painting.
   const canvas = document.createElement('canvas');
   canvas.className = 'maw-rail';
@@ -207,7 +208,7 @@ export function createMawScrubber(rail, input, media) {
     if(surface.width!==w||surface.height!==h){surface.width=w;surface.height=h;}
     const frame=spriteIndex();
     rail.dataset.progress=progress.toFixed(3);
-    if(gl)renderGL(frame);else renderCanvas(frame);
+    if(gl)renderGL(frame);else renderCanvas(frame);painted=true;
     schedule();
   }
   async function load(name,file) {
@@ -249,7 +250,8 @@ export function createMawScrubber(rail, input, media) {
     event.preventDefault();fallback();rail.dataset.renderer=renderer;schedule();
   });
   return {
-    select(active){enabled=active;rail.classList.toggle('maw-scrubber',active);prior=0;grabbing=false;pointerId=null;schedule();},
+    get isReady(){return ready&&painted;},
+    select(active){enabled=active;if(active)painted=false;rail.classList.toggle('maw-scrubber',active);prior=0;grabbing=false;pointerId=null;schedule();},
     motion(active){ambient=active;schedule();}
   };
 }

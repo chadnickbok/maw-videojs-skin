@@ -116,4 +116,19 @@ rendering decisions, and verification are documented in
 The Thorax volume animation and browser review are documented in
 [volume production notes](docs/thorax/volume/production.md).
 
+## Loading state
+
+The player begins behind a critical-CSS loading overlay. Selected skin artwork
+is decoded and all selected renderers must paint before the player is revealed
+and controls become interactive. The same gate covers skin switching; stale
+loads cannot reveal a previous skin. Failed artwork displays a reload action.
+Reduced motion keeps the loading ring static. Video buffering is independent of
+artwork loading, so a slow demo stream does not block the skin.
+
+Browser QA used deliberately held image callbacks to verify the hidden controls
+and spinner before release, then the completed Thorax and Maw reveals. Fourteen
+tests pass, including readiness ordering, rapid selection and asset failure.
+
+![Loading overlay](docs/loading-state.jpg)
+
 The public repository streams the demo from https://vjs.zencdn.net/v/oceans.mp4. The hosted build bundles that same demo clip locally.

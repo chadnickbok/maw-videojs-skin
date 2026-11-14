@@ -1,3 +1,4 @@
+import {createSkinLoader,skinAssets} from './skin-loader.js';
 import { createThorax } from './thorax.js';
 import { createMediaAudio } from './media-audio.js';
 import { createMawVolume } from './maw-volume.js';
@@ -26,8 +27,28 @@ for (const [i,s] of specimens.entries()) {
  button.innerHTML='<img alt="" src="tissue/'+s.id+'-volume.webp"><span><small>SPECIMEN '+number(i)+'</small><b>'+titleCase(s.id)+'</b></span><span class="dot"></span>';
  button.onclick=()=>select(s); $('#list').append(button);
 }
+const stage=$('.stage'),player=$('#player'),assetRequests=new Map();
+const showSkin=createSkinLoader({
+ loadImage(file){
+  if(!assetRequests.has(file))assetRequests.set(file,new Promise((resolve,reject)=>{
+   const image=new Image();image.onload=()=>image.decode().then(resolve,reject);image.onerror=()=>reject(Error('Artwork unavailable'));image.src='./tissue/'+file;
+  }).catch(error=>{assetRequests.delete(file);throw error;}));
+  return assetRequests.get(file);
+ },
+ waitUntil(check){return new Promise((resolve,reject)=>{
+  const started=performance.now();function poll(){if(check())resolve();else if(performance.now()-started>20000)reject(Error('Skin did not finish rendering'));else requestAnimationFrame(poll);}poll();
+ });},
+ afterPaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));},
+ onState(state,id){
+  const loading=state!=='ready';stage.classList.toggle('is-loading',loading);stage.classList.toggle('has-load-error',state==='error');stage.setAttribute('aria-busy',String(state==='loading'));player.inert=loading;
+  $('#loading-label').textContent=state==='error'?'This specimen could not load. Please reload to try again.':'Loading '+titleCase(id)+'…';
+  $('#reload-skin').hidden=state!=='error';player.dataset.skinLoading=state;
+ }
+});
+$('#reload-skin').onclick=()=>location.reload();
 let skin, live=!matchMedia('(prefers-reduced-motion: reduce)').matches, pressure=0, dragging=false, lastX=0, velocity=0;
 function select(s){
+ showSkin(s.id,skinAssets[s.id],()=>s.id==='thorax'?thorax.isReady:mawButton.isReady&&mawScrubber.isReady&&mawVolume.isReady);
  skin=s; $('#player').classList.toggle('organism',s.id==='maw'); mawButton.select(s.id === 'maw'); mawScrubber.select(s.id === 'maw');mawVolume.select(s.id === 'maw');thorax.select(s.id === 'thorax'); const body=document.body.style;
  body.setProperty('--accent',s.accent); body.setProperty('--ink',s.ink);body.setProperty('--cycle',s.cycle+'s');
  for(const part of ['dock','pause','frame']) body.setProperty('--'+part,'url(tissue/'+s.id+'-'+part+'.webp)');

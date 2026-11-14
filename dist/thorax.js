@@ -16,6 +16,7 @@ export function createThorax(player, media, seek, volume) {
   const images = {};
   const worm = createThoraxWorm(images,player);
   const lungs = createThoraxVolume(images,player);
+  let painted=false;
   let enabled = false, ambient = true, ready = false, loading = false, raf = 0, prior = 0;
   let gl, program, texture, fallback, width = 1, height = 1, dpr = 1;
   let valve = media.paused ? 1 : 0;
@@ -164,7 +165,7 @@ export function createThorax(player, media, seek, volume) {
     tendon([r.x+r.w-12,r.y+r.h*.50],[l.x+l.w*.25,l.y+l.h*.5],folded?-20:breath*-2,folded?1.3:1.8);
     worm.draw(ink,r,{progress:Number(seek.value)/1000,dt:Math.min(elapsed,.1),time:now/1000,dragging:seekPointer!==null,ambient:liveMotion(),reduced:reduced.matches,focused:focused==='rail'});lungs.draw(ink,l,{dt:Math.min(elapsed,.1),value:Number(volume.value)/100,reduced:reduced.matches,ambient:liveMotion(),time:now/1000,focused:focused==='bellows',dragging:volumePointer!==null});organ('valve',valve,v);
     if(ripple>0)glow(rippleOrigin,rects.organs.y+rects.organs.h*.5,35+(1-ripple)*100,35,ripple*.07);
-    present(now,life);player.classList.add('thorax-ready');prior=now;
+    present(now,life);painted=true;player.classList.add('thorax-ready');prior=now;
     player.dataset.thoraxPose=String(Math.round(valve*29));player.dataset.thoraxValve='iris-30';player.dataset.thoraxValveScale='0.82';
     if(life||worm.active||lungs.active||Math.abs(valve-(media.paused?1:0))>.001||pressure>.001||ripple>0)schedule();
   }
@@ -251,8 +252,9 @@ export function createThorax(player, media, seek, volume) {
   }).catch(()=>{player.dataset.thoraxRenderError='Artwork could not load';});
   }
   return {
+    get isReady(){return ready&&painted;},
     select(active){enabled=active;player.classList.toggle('thoracic',active);canvas.hidden=!active;release();
-      if(active){load();volume.dir='ltr';volume.title='Drag across the sacs · right is louder';valve=media.paused?1:0;worm.reset(Number(seek.value)/1000);lungs.reset(Number(volume.value)/100);prior=0;measure();schedule();}
+      if(active){painted=false;load();volume.dir='ltr';volume.title='Drag across the sacs · right is louder';valve=media.paused?1:0;worm.reset(Number(seek.value)/1000);lungs.reset(Number(volume.value)/100);prior=0;measure();schedule();}
     },
     motion(active){ambient=active;schedule();}
   };

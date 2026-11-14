@@ -1,5 +1,6 @@
 // The atlas supplies the authored fold motion. The shader adds only surface life.
 export function createMawButton(button, media) {
+  let painted=false;
   let canvas = document.createElement('canvas');
   canvas.className = 'maw-surface';
   canvas.setAttribute('aria-hidden', 'true');
@@ -148,6 +149,7 @@ export function createMawButton(button, media) {
       context2d.clearRect(0, 0, size, size);
       context2d.drawImage(atlas, pose % 5 * w + 2, Math.floor(pose / 5) * h + 2, w-4, h-4, 0, 0, size, size);
     }
+    painted=true;
     if (depth !== target || (ambient && !reducedMotion.matches)) schedule();
   }
 
@@ -187,10 +189,11 @@ export function createMawButton(button, media) {
   new ResizeObserver(schedule).observe(button);
 
   return {
+    get isReady(){return ready&&painted;},
     select(active) {
       enabled = active;
       button.classList.toggle('maw-button', active);
-      if (active) { depth = media.paused ? 1 : 0; lastTime=0; schedule(); }
+      if (active) {painted=false; depth = media.paused ? 1 : 0; lastTime=0; schedule(); }
     },
     motion(active) { ambient=active; schedule(); }
   };
